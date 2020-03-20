@@ -1,0 +1,59 @@
+# 关键字
+<char>
+<int>
+<long>
+<float>
+<double>
+<bool>
+<if>
+<else>
+<do>
+<while>
+<void>
+<return>
+
+#算术运算符
+<add_op>
+<sub_op>
+<mult_op>
+<div_op>
+<mod_op>
+
+# 关系运算符
+<relop, LT>
+<relop, GT>
+<relop, LE>
+<relop, GE>
+<relop, EQ>
+<relop, NE>
+
+# 逻辑运算符
+<and>
+<or>
+<not>
+
+# 标识符
+<id, value>
+
+# 常数
+<decimal, value>
+<hex, value>
+<octal, value>
+<fconst, value>
+<string, value>
+<cconst, value>
+
+# 注释
+<comment>
+
+# 界符
+<assin_op>
+<RP>
+<LP>
+<SEMI>
+<DOT>
+<SLP>
+<SRP>
+
+
+
