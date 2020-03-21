@@ -30,6 +30,7 @@ class State():
 
     # 获得下一个状态
     def trans(self, input):
+
         if input not in self.transfunc.keys():
             return -1
         return self.transfunc[input]

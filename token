@@ -47,13 +47,17 @@
 <comment>
 
 # 界符
-<assin_op>
-<RP>
-<LP>
-<SEMI>
-<DOT>
-<SLP>
-<SRP>
+<semi> ;
+<lrp> [
+<rrp> ]
+<dot> .
+<rp> }
+<lp> {
+<slp> (
+<srp> )
+<com> ,
+<col> :
+<qm> ?
 
 
 
