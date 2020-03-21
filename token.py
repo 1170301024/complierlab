@@ -1,11 +1,12 @@
 #
-class token:
-    def __init__(self, lexunit, value=None):
-        self.lexunit = lexunit
-        self.value=value
+class Token:
+    def __init__(self, code, attr=None):
+        self.code = code
+        self.attr = attr
+
     def __str__(self):
-        if self.value == None:
-            return (self.lexunit)
+        if self.attr is None:
+            return ("<%s>" %self.code)
         else:
-            return (self.lexunit, )
+            return ("<%s, %s>" %(self.code, self.attr))
 
