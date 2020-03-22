@@ -1,8 +1,8 @@
 from state import State
-
+from token import Token
 
 # Non-printable characters
-from token import Token
+
 
 NPC = ['\x00', '\x01', '\x02', '\x03', '\x04', '\x05', '\x06', '\x07', '\x08', '\x0b', '\x0c', '\x0e',
        '\x0f', '\x10', '\x11', '\x12', '\x13', '\x14', '\x15', '\x16', '\x17', '\x18', '\x19', '\x1a',
@@ -18,9 +18,12 @@ class LexAnalysis:
     # 获得下一个token
     def getnexttoken(self):
         if(self.forward == len(self.program)):
-            return Token("end")
+            return ['end',Token("end")]
         self.lexmeBegin = self.forward
         curstate = 0
+        #add
+        currentInput = ''
+        record = ''
         while(True):
             prestate = curstate
             if (self.forward == len(self.program)):
@@ -29,37 +32,49 @@ class LexAnalysis:
             curstate = self.states[curstate].trans(input)
             if(curstate < 0):
                 break
+            currentInput += input
+            record += '<'+str(prestate)+' , '+input+' , '+str(curstate)+'>'
             self.forward += 1
         if(self.forward == self.lexmeBegin):
             print(".error in program")
+            return [currentInput,'error:error in program']
         elif(self.states[prestate].ifaccept()):
             if(self.states[prestate].ifneedattri()):
-                token = Token(self.states[prestate].code, self.program[self.lexmeBegin:self.forward])
+                code = self.states[prestate].code
+                value = self.program[self.lexmeBegin:self.forward]
+                # 判断是否是关键字
+                if(code == "id" and value in self.keywords):
+                    token = Token(value)
+                else:
+                    token = Token(code, value)
             else:
                 token = Token(self.states[prestate].code, self.states[prestate].attr)
             if(token.code == "delimiter"):
                 return self.getnexttoken()
             else:
-                return token
+                return [currentInput,token,record]
         else:
             print("error in program")
+            return [currentInput, 'error:error in program']
 
     # 初始化词法分析类，从文件读入DFA以及程序实例
     def init(self):
-        file_dfa = input("请输入DFA文件名：")
+        pass
+        # file_dfa = input("请输入DFA文件名：")
 
-        self.initDFA(file_dfa)
+        # self.initDFA(file_dfa)
+
         #self.testinitDFA()
-        path_program = input("请输入程序实例文件名：")
-        file_program = open(path_program, "r")
-        self.program = file_program.read()
+        # path_program = input("请输入程序实例文件名：")
+        # file_program = open(path_program, "r", encoding="utf-8")
+        # self.program = file_program.read()
         self.lexmeBegin = 0
         self.forward = 0
         #从文件读入程序放入缓存区
 
     def initDFA(self, path):
         row = 0
-        file = open(path, "r")
+        file = open(path, "r", encoding="GBK")
         for line in file.readlines():
             row += 1
             line = line.strip()
@@ -72,11 +87,15 @@ class LexAnalysis:
 
             # 将有效行按空白分割并判断合法性
             parts = line.split()
+            # 读入总状态
             if(parts[0] == "stotal"):
                 self.states = [State() for i in range(int(parts[1]))]
                 continue
+            if(parts[0] == "KEYWORDS"):
+                self.keywords = parts[1:]
+                continue
             if(len(parts) != 3 and len(parts) != 4):
-                print("error in %s lines" % (row))
+                print("error in %s line" % (row))
             # 处理转换的第一部分
             sstates = parts[0].split('-')
             dstate = int(parts[2])
@@ -119,7 +138,7 @@ class LexAnalysis:
                             self.states[sstate].addtrans(parts[1][i], dstate)
                 else:
                     print(parts[1])
-                    print("error in %s lines...." % (row))
+                    print("error in %s line...." % (row))
 
         print("initialize DFA successfully")
 
