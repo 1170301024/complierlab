@@ -8,6 +8,9 @@ from lexanalysis import LexAnalysis
 root = Tk()
 root.title('编译原理实验')
 root.geometry('800x800')
+screenwidth = root.winfo_screenwidth()
+screenheight = root.winfo_screenheight()
+
 
 class UI:
     def __init__(self, lexer):
@@ -76,6 +79,7 @@ class UI:
             self.contentList = file_program.readlines()
             str_data = ''.join(self.contentList)
             content.delete('1.0',END)
+            line.delete('1.0',END)
             content.insert(tkinter.END,str_data)
             for i in range(0,len(self.contentList)):
                 if i == 0:
@@ -115,9 +119,12 @@ class UI:
             lb2 = Label(window, text='状态转换表', font=('黑体', 16, 'bold'))
             lb2.place(relx=0.75, rely=0.1)
 
+            frame = Frame(window)
+            # frame.place(x=630, y=90)
+            frame.pack(anchor=W, ipadx=10, side=LEFT, expand=True, fill = X)
             # 词法规则
-            content = Text(window, width=70, height=30)
-            content.place(x=30, y=90)
+            content = Text(frame, width=70, height=30)
+            content.pack(anchor=W, ipadx=10, side=LEFT, expand=False)
             fileName = '../lexicalRules'
             file = open(fileName, 'r', encoding="utf-8")
             strTemp = ''.join(file.readlines())
@@ -138,27 +145,18 @@ class UI:
             column = list(column) #终结符集合
             column.sort()
             column.insert(0,'state')
-            # print('column: ',column)
 
-            for x in range(lines):
-                for y in range(len(column)):
-                    pass
-            frame = Frame(window,width=30)
-            frame.place(x=630, y=90)
-            treeview = ttk.Treeview(frame, height = 19, columns = column,show = 'headings')
+            treeview = ttk.Treeview(frame, height = 20, columns = column,show = 'headings')
+            treeview.pack(anchor=E,ipadx=100, side=LEFT, expand=True, fill=BOTH)
             # treeview.place(x=630, y=90)
             # ----vertical scrollbar------------
-            vbar = ttk.Scrollbar(frame, orient=VERTICAL, command=treeview.yview)
+            vbar = ttk.Scrollbar(treeview, orient=VERTICAL, command=treeview.yview)
             treeview.configure(yscrollcommand=vbar.set)
-            # vbar.place(x=1170,y=90)
-            treeview.grid(row=0, column=0, sticky=NSEW)
-            vbar.grid(row=0, column=1, sticky=NS)
+            vbar.pack(side=RIGHT, fill=Y)
             # ----horizontal scrollbar----------
-            hbar = ttk.Scrollbar(frame, orient=HORIZONTAL, command=treeview.xview)
+            hbar = ttk.Scrollbar(treeview, orient=HORIZONTAL, command=treeview.xview)
             treeview.configure(xscrollcommand=hbar.set)
-            # hbar.place(x=630,y=390)
-            # hbar.pack(side = BOTTOM, fill = X)
-            hbar.grid(row=1, column=0, sticky=EW)
+            hbar.pack(side = BOTTOM, fill = X)
             window.rowconfigure(0,weight = 1)
             window.columnconfigure(0,weight=1)
             for head in column:
@@ -290,7 +288,7 @@ class UI:
                     else:
                         continue
             frameProject = Frame(root)
-            frameProject.pack(side=LEFT,fill=BOTH,anchor=E,ipadx = 10,expand=True)
+            frameProject.pack(side=RIGHT,fill=BOTH,anchor=E,expand=True)
             self.treeview = ttk.Treeview(frameProject)
             self.treeview.pack(fill=Y,expand=True)
             firstClass = ['source','lexer', 'parser', 'semantic']
@@ -320,11 +318,12 @@ class UI:
             error = ['error', 'reason']
 
             treeview2 = ttk.Treeview(frameText, height=10, columns=error, show='headings')
-            treeview2.column(error[0], width=100, anchor='center')
+            width = int(screenwidth*0.06)
+            treeview2.column(error[0], width=width, anchor='center')
             treeview2.heading(error[0], text=error[0])
-            treeview2.column(error[1], width=1000,anchor='center')
+            treeview2.column(error[1], width=width*5,anchor='center')
             treeview2.heading(error[1], text=error[1])
-            treeview2.pack(anchor=S, ipadx=10,side = LEFT,expand = True,fill=BOTH)
+            treeview2.pack(anchor=S, ipadx=10, side = LEFT, expand = False,fill=BOTH)
 
             '''
             需要错误信息返回值
