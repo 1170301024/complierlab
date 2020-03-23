@@ -6,7 +6,7 @@ class Token:
 
     def __str__(self):
         if self.attr is None:
-            return ("<%s,->" %self.code)
+            return ("<%s, ->" %self.code)
         else:
             return ("<%s, %s>" %(self.code, self.attr))
 

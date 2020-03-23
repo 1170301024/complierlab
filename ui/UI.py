@@ -323,7 +323,7 @@ class UI:
 
             treeview = ttk.Treeview(root)
             treeview.place(relx=0.75, rely=0.2)
-            firstClass = ['lexer', 'parser', 'semantic']
+            firstClass = ['source', 'lexer', 'parser', 'semantic']
             firstClassDir = []
             secondClass1 = ['ui', 'dfa_table', 'hello', 'lexanalysis.py', 'lexicalRules', 'state.py'
                 , 'test.py', 'token', 'token.py']
@@ -338,12 +338,13 @@ class UI:
                 count += 1
                 firstClassDir.append(tempDir)
             count = 0
-            for temp in secondClass1:#lexer
-                tempDir = treeview.insert(firstClassDir[0], count, temp, text=temp, value=(temp))
-                count += 1
-                if tempDir == 'ui':
-                    uiNode = treeview.insert(tempDir, count, 'UI.py', text='UI.py', value=('UI.py'))
-            treeview.bind('<Button-1>',selectEvent)
+
+            # for temp in secondClass1:#lexer
+            #     tempDir = treeview.insert(firstClassDir[0], count, temp, text=temp, value=(temp))
+            #     count += 1
+            #     if tempDir == 'ui':
+            #         uiNode = treeview.insert(tempDir, count, 'UI.py', text='UI.py', value=('UI.py'))
+            # treeview.bind('<Button-1>',selectEvent)
 
         def config():
             '''
