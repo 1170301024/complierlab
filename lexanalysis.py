@@ -59,7 +59,6 @@ class LexAnalysis:
 
     # 初始化词法分析类，从文件读入DFA以及程序实例
     def init(self):
-        pass
         # file_dfa = input("请输入DFA文件名：")
 
         # self.initDFA(file_dfa)
