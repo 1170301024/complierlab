@@ -65,15 +65,9 @@ class LexAnalysis:
         # self.initDFA(file_dfa)
 
         #self.testinitDFA()
-<<<<<<< HEAD
         # path_program = input("请输入程序实例文件名：")
         # file_program = open(path_program, "r", encoding="utf-8")
         # self.program = file_program.read()
-=======
-        path_program = input("请输入程序实例文件名：")
-        file_program = open(path_program, "r", encoding="utf-8")
-        self.program = file_program.read()
->>>>>>> ce6949f064f89e94dc8837b40bd3a122fb1b98aa
         self.lexmeBegin = 0
         self.forward = 0
         #从文件读入程序放入缓存区

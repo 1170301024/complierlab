@@ -210,14 +210,13 @@ class UI:
             # vbar = ttk.Scrollbar(window, orient=VERTICAL, command=treeview2.yview)
             # treeview2.configure(yscrollcommand=vbar.set)
             # vbar.pack(side = RIGHT, fill = Y)
-
             #handle
             currentLine = 0
             i = 0
             while True and not self.lexical:
                 recieve = self.lexer.getnexttoken()
-                if 'error' in recieve[1]:
-                    treeview2.insert('',i,value=recieve[1])
+                # if 'error' in recieve[1]:
+                #     treeview2.insert('',i,value=recieve[1])
                 input = recieve[0]
                 while input not in self.contentList[currentLine]:
                     currentLine += 1
