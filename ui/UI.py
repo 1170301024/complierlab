@@ -13,7 +13,12 @@ class UI:
     def __init__(self, lexer):
         self.lexer = lexer
         self.contentList = None
+        #If lexical Analyse or not
         self.lexical = False
+        #ProjectTree
+        self.treeview = None
+        self.projectDir = []
+        self.filePath = {}
         # self.maxSize = 5000*3
         # root.maxsize(self.maxSize,self.maxSize)
 
@@ -33,7 +38,6 @@ class UI:
                 print('保存完成')
             else:
                 print('文件未保存')
-
 
         def openfile():
             '''
@@ -56,6 +60,11 @@ class UI:
             # lb1 = Label(root, text='读取转换表成功', font=('黑体', 16, 'bold'))
             # lb1.place(relx=0.5, rely=0.5)
             # self.lexer.testinitDFA()
+            fileName = file.split('/')[-1]
+            item = self.projectDir[0][1]
+            self.treeview.insert(item,0,fileName,text=fileName,value=(fileName))
+            self.filePath[fileName] = file
+            fileToContent(file)
 
         def fileToContent(file):
             '''
@@ -84,7 +93,10 @@ class UI:
                 return
             file_program = open(file, "r", encoding="utf-8")
             self.lexer.program = file_program.read()
-
+            fileName = file.split('/')[-1]
+            item = self.projectDir[0][0]
+            self.treeview.insert(item, 0, fileName, text=fileName, value=(fileName))
+            self.filePath[fileName] = file
             fileToContent(file)
 
         def lexicalRule():
@@ -271,80 +283,33 @@ class UI:
             :return:
             '''
             def selectEvent(event):
-                for item in treeview.selection():
-                    item_text = item
-                    # item_text = treeview.item(item,'values')
-                    # print(item)
-                    if item_text == 'token':
-                        tokenhandler()
-                    elif item_text == 'token.py':
-                        tokenpyhandler()
-                    elif item_text == 'test.py':
-                        testpyhandler()
-                    elif item_text == 'UI.py':
-                        UIhandler()
-                    elif item_text == 'lexicalRules':
-                        lexicalRuleshandler()
-                    elif item_text == 'lexanalysis.py':
-                        lexanalysishandler()
-                    elif item_text == 'hello':
-                        hellohandler()
-                    elif item_text == 'dfa_table':
-                        dfa_tablehandler()
-                    elif item_text == 'test.py':
-                        testpyhandler()
-
-            #Handler
-            def tokenhandler():
-                fileToContent('../token')
-
-            def tokenpyhandler():
-                fileToContent('../token.py')
-
-            def lexanalysishandler():
-                fileToContent('../lexanalysis.py')
-
-            def statehandler():
-                fileToContent('../state.py')
-
-            def dfa_tablehandler():
-                fileToContent('../dfa_table')
-
-            def UIhandler():
-                fileToContent('UI.py')
-
-            def hellohandler():
-                fileToContent('../hello')
-
-            def lexicalRuleshandler():
-                fileToContent('../lexicalRules')
-
-            def testpyhandler():
-                fileToContent('../test.py')
-
-            treeview = ttk.Treeview(root)
-            treeview.place(relx=0.75, rely=0.2)
-            firstClass = ['lexer', 'parser', 'semantic']
+                for item in self.treeview.selection():
+                    item_text = self.treeview.item(item, 'values')
+                    if item_text[0] not in ['project','source','lexer', 'parser', 'semantic']:
+                        fileToContent(self.filePath[item_text[0]])
+                    else:
+                        continue
+            frameProject = Frame(root)
+            frameProject.pack(side=LEFT,fill=BOTH,anchor=E,ipadx = 10,expand=True)
+            self.treeview = ttk.Treeview(frameProject)
+            self.treeview.pack(fill=Y,expand=True)
+            firstClass = ['source','lexer', 'parser', 'semantic']
             firstClassDir = []
-            secondClass1 = ['ui', 'dfa_table', 'hello', 'lexanalysis.py', 'lexicalRules', 'state.py'
-                , 'test.py', 'token', 'token.py']
 
-            secondClass2 = []
-            secondClass3 = []
-
-            rootDir = treeview.insert('', 0, 'project', text='project', value=('project'))
+            rootDir = self.treeview.insert('', 0, 'project', text='project', value=('project'))
             count = 0
             for temp in firstClass: #一级目录
-                tempDir = treeview.insert(rootDir, count, temp, text=temp, value=(temp))
+                tempDir = self.treeview.insert(rootDir, count, temp, text=temp, value=(temp))
                 count += 1
                 firstClassDir.append(tempDir)
-            count = 0
-            for temp in secondClass1:#lexer
-                tempDir = treeview.insert(firstClassDir[0], count, temp, text=temp, value=(temp))
-                count += 1
-                if tempDir == 'ui':
-                    uiNode = treeview.insert(tempDir, count, 'UI.py', text='UI.py', value=('UI.py'))
-            treeview.bind('<Button-1>',selectEvent)
+            self.projectDir.append(firstClass)
+            # count = 0
+            # for temp in secondClass1:#lexer
+            #     tempDir = treeview.insert(firstClassDir[0], count, temp, text=temp, value=(temp))
+            #     count += 1
+            #     if tempDir == 'ui':
+            #         uiNode = treeview.insert(tempDir, count, 'UI.py', text='UI.py', value=('UI.py'))
+            self.treeview.bind('<Button-1>',selectEvent)
 
         def config():
             '''
@@ -353,12 +318,14 @@ class UI:
             '''
             #错误信息
             error = ['error', 'reason']
-            treeview2 = ttk.Treeview(root, height=10, columns=error, show='headings')
-            treeview2.place(x=0, y=600)
-            treeview2.column(error[0], width=50, anchor='center')
+
+            treeview2 = ttk.Treeview(frameText, height=10, columns=error, show='headings')
+            treeview2.column(error[0], width=100, anchor='center')
             treeview2.heading(error[0], text=error[0])
             treeview2.column(error[1], width=1000,anchor='center')
             treeview2.heading(error[1], text=error[1])
+            treeview2.pack(anchor=S, ipadx=10,side = LEFT,expand = True,fill=BOTH)
+
             '''
             需要错误信息返回值
             '''
@@ -366,22 +333,25 @@ class UI:
             #项目文件
             projectDir()
 
-        #菜单初始化
-        menubar = Menu(root)
-
         # 屏幕显示
-        scY = Scrollbar(root)
-        scX = Scrollbar(root, orient=HORIZONTAL)
-        scY.pack(side=RIGHT, fill=Y)
-        scX.pack(side=BOTTOM, fill=X)
-        content = Text(root, width=70, height=30, yscrollcommand=scY.set, xscrollcommand=scX.set)
-        content.place(x=30, y=50)
+        frameText = Frame(root)
 
         # 行数显示
-        line = Text(root, width=3, height=30, yscrollcommand=scY.set)
-        line.place(x=0, y=50)
+        scY = Scrollbar(frameText)
+        scX = Scrollbar(frameText, orient=HORIZONTAL)
+        scY.pack(side=RIGHT, fill=Y)
+        scX.pack(side=BOTTOM, fill=X)
+
+        line = Text(frameText, width=3, yscrollcommand=scY.set)
+        line.pack(side=LEFT,fill=BOTH, expand=True,padx=1)
         line.configure(background='Gray')
 
+        content = Text(frameText, width=70, yscrollcommand=scY.set, xscrollcommand=scX.set)
+        content.pack(side=TOP,fill=BOTH, expand=True,padx=1)
+        frameText.pack(side = LEFT,fill=Y,expand = True,anchor=NW)
+
+        #菜单
+        menubar = Menu(root)
         menuList = ['词法规则','词法分析','语法规则','语法分析','语义规则','语义分析']
         eventList = [lexicalRule,lexicalAnalysis,syntaxRule,syntaxAnalysis,semanticsRule,semanticsAnalysis]
         fileOpen = Menu(menubar)
