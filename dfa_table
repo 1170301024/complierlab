@@ -86,6 +86,3 @@ KEYWORDS auto break case char const continue default double else enum extern flo
 # delimiter
 0 $blank 46 <delimiter>
 46 $blank 46 <delimiter>
-
-
-

@@ -7,15 +7,36 @@ from lexanalysis import LexAnalysis
 
 root = Tk()
 root.title('编译原理实验')
-root.geometry('800x800')
+root.geometry('1000x600')
+screenwidth = root.winfo_screenwidth()
+screenheight = root.winfo_screenheight()
+
 
 class UI:
     def __init__(self, lexer):
         self.lexer = lexer
         self.contentList = None
+        self.content = None
+        self.line = None
+
+        # 当前在content中的文件
+        self.curfile = None
+
+        #If lexical Analyse or not
         self.lexical = False
+
+        #ProjectTree
+        self.treeview = None
+        self.projectDir = []
+        self.filePath = {}
         # self.maxSize = 5000*3
         # root.maxsize(self.maxSize,self.maxSize)
+
+    def error(self, errstr):
+        pass
+
+    def message(self, message):
+        pass
 
     def root(self):
         """
@@ -23,19 +44,27 @@ class UI:
         :return:void
         """
         #相应列表
-        def save():
-            file_path = filedialog.asksaveasfilename(title=u'保存文件')
-            print('保存文件：', file_path)
-            file_text = content.get('1.0',END)
+        def save_file():
+            file_text = self.content.get('1.0', END)
+
+            if(self.curfile is None):
+                print("error")
+                return
+            elif(self.curfile in self.filePath.keys()):
+                file_path = self.filePath[self.curfile]
+                print(file_path)
+            else:
+                file_path = filedialog.asksaveasfilename(title=u'保存文件')
+                print('保存文件：', file_path)
+
             if file_path is not None:
-                with open(file=file_path, mode='a+', encoding='utf-8') as file:
+                with open(file=file_path, mode='w+', encoding='utf-8') as file:
                     file.write(file_text)
                 print('保存完成')
             else:
                 print('文件未保存')
 
-
-        def openfile():
+        def read_file():
             '''
             读取系统文件，返回文件名
             :return:文件路径
@@ -43,19 +72,6 @@ class UI:
             file_path = filedialog.askopenfilename(title='打开文件', filetype=[('all files', '')])
             print('打开文件', file_path)
             return file_path
-
-        def table():
-            '''
-            读取转换表
-            :return: void
-            '''
-            file = openfile()
-            if file == '':
-                return
-            self.lexer.initDFA(path = file)
-            # lb1 = Label(root, text='读取转换表成功', font=('黑体', 16, 'bold'))
-            # lb1.place(relx=0.5, rely=0.5)
-            # self.lexer.testinitDFA()
 
         def fileToContent(file):
             '''
@@ -66,25 +82,50 @@ class UI:
             file_program = open(file, "r", encoding="utf-8")
             self.contentList = file_program.readlines()
             str_data = ''.join(self.contentList)
-            content.delete('1.0',END)
-            content.insert(tkinter.END,str_data)
+            self.content.delete('1.0',END)
+            self.line.delete('1.0',END)
+            self.content.insert(tkinter.END,str_data)
             for i in range(0,len(self.contentList)):
                 if i == 0:
-                    line.insert(tkinter.END, str(i + 1))
+                    self.line.insert(tkinter.END, str(i + 1))
                     continue
-                line.insert(tkinter.END,'\n'+str(i+1))
+                self.line.insert(tkinter.END,'\n'+str(i+1))
 
-        def source():
+        def read_DFA_table():
+            '''
+            读取转换表
+            :return: void
+            '''
+            file = read_file()
+            if file == '':
+                return
+            self.lexer.initDFA(path = file)
+            # lb1 = Label(root, text='读取转换表成功', font=('黑体', 16, 'bold'))
+            # lb1.place(relx=0.5, rely=0.5)
+            # self.lexer.testinitDFA()
+            fileName = file.split('/')[-1]
+            item = self.projectDir[0][1]
+            self.treeview.insert(item,0,fileName,text=fileName,value=(fileName))
+            self.filePath[fileName] = file
+            # fileToContent(file)
+
+
+
+        def open_file():
             '''
             读取源文件
             :return: void
             '''
-            file = openfile()
+            file = read_file()
             if file == '':
                 return
             file_program = open(file, "r", encoding="utf-8")
             self.lexer.program = file_program.read()
-
+            fileName = file.split('/')[-1]
+            item = self.projectDir[0][0]
+            self.treeview.insert(item, 0, fileName, text=fileName, value=(fileName))
+            self.filePath[fileName] = file
+            self.curfile = fileName
             fileToContent(file)
 
         def lexicalRule():
@@ -103,9 +144,12 @@ class UI:
             lb2 = Label(window, text='状态转换表', font=('黑体', 16, 'bold'))
             lb2.place(relx=0.75, rely=0.1)
 
+            frame = Frame(window)
+            # frame.place(x=630, y=90)
+            frame.pack(anchor=W, ipadx=10, side=LEFT, expand=True, fill = X)
             # 词法规则
-            content = Text(window, width=70, height=30)
-            content.place(x=30, y=90)
+            content = Text(frame, width=70, height=30)
+            content.pack(anchor=W, ipadx=10, side=LEFT, expand=False)
             fileName = '../lexicalRules'
             file = open(fileName, 'r', encoding="utf-8")
             strTemp = ''.join(file.readlines())
@@ -126,27 +170,18 @@ class UI:
             column = list(column) #终结符集合
             column.sort()
             column.insert(0,'state')
-            # print('column: ',column)
 
-            for x in range(lines):
-                for y in range(len(column)):
-                    pass
-            frame = Frame(window,width=30)
-            frame.place(x=630, y=90)
-            treeview = ttk.Treeview(frame, height = 19, columns = column,show = 'headings')
+            treeview = ttk.Treeview(frame, height = 20, columns = column,show = 'headings')
+            treeview.pack(anchor=E,ipadx=100, side=LEFT, expand=True, fill=BOTH)
             # treeview.place(x=630, y=90)
             # ----vertical scrollbar------------
-            vbar = ttk.Scrollbar(frame, orient=VERTICAL, command=treeview.yview)
+            vbar = ttk.Scrollbar(treeview, orient=VERTICAL, command=treeview.yview)
             treeview.configure(yscrollcommand=vbar.set)
-            # vbar.place(x=1170,y=90)
-            treeview.grid(row=0, column=0, sticky=NSEW)
-            vbar.grid(row=0, column=1, sticky=NS)
+            vbar.pack(side=RIGHT, fill=Y)
             # ----horizontal scrollbar----------
-            hbar = ttk.Scrollbar(frame, orient=HORIZONTAL, command=treeview.xview)
+            hbar = ttk.Scrollbar(treeview, orient=HORIZONTAL, command=treeview.xview)
             treeview.configure(xscrollcommand=hbar.set)
-            # hbar.place(x=630,y=390)
-            # hbar.pack(side = BOTTOM, fill = X)
-            hbar.grid(row=1, column=0, sticky=EW)
+            hbar.pack(side = BOTTOM, fill = X)
             window.rowconfigure(0,weight = 1)
             window.columnconfigure(0,weight=1)
             for head in column:
@@ -270,133 +305,121 @@ class UI:
             :return:
             '''
             def selectEvent(event):
-                for item in treeview.selection():
-                    item_text = item
-                    # item_text = treeview.item(item,'values')
-                    # print(item)
-                    if item_text == 'token':
-                        tokenhandler()
-                    elif item_text == 'token.py':
-                        tokenpyhandler()
-                    elif item_text == 'test.py':
-                        testpyhandler()
-                    elif item_text == 'UI.py':
-                        UIhandler()
-                    elif item_text == 'lexicalRules':
-                        lexicalRuleshandler()
-                    elif item_text == 'lexanalysis.py':
-                        lexanalysishandler()
-                    elif item_text == 'hello':
-                        hellohandler()
-                    elif item_text == 'dfa_table':
-                        dfa_tablehandler()
-                    elif item_text == 'test.py':
-                        testpyhandler()
+                for item in self.treeview.selection():
+                    item_text = self.treeview.item(item, 'values')
+                    if item_text[0] not in ['project','source','lexer', 'parser', 'semantic']:
+                        self.curfile = item_text[0]
+                        fileToContent(self.filePath[item_text[0]])
+                    else:
+                        continue
 
-            #Handler
-            def tokenhandler():
-                fileToContent('../token')
 
-            def tokenpyhandler():
-                fileToContent('../token.py')
+            self.treeview = ttk.Treeview(projectframe)
+            self.treeview.pack(expand=YES, fill=BOTH)
+            firstClass = ['source','lexer', 'parser', 'semantic']
 
-            def lexanalysishandler():
-                fileToContent('../lexanalysis.py')
-
-            def statehandler():
-                fileToContent('../state.py')
-
-            def dfa_tablehandler():
-                fileToContent('../dfa_table')
-
-            def UIhandler():
-                fileToContent('UI.py')
-
-            def hellohandler():
-                fileToContent('../hello')
-
-            def lexicalRuleshandler():
-                fileToContent('../lexicalRules')
-
-            def testpyhandler():
-                fileToContent('../test.py')
-
-            treeview = ttk.Treeview(root)
-            treeview.place(relx=0.75, rely=0.2)
-            firstClass = ['source', 'lexer', 'parser', 'semantic']
             firstClassDir = []
-            secondClass1 = ['ui', 'dfa_table', 'hello', 'lexanalysis.py', 'lexicalRules', 'state.py'
-                , 'test.py', 'token', 'token.py']
 
-            secondClass2 = []
-            secondClass3 = []
-
-            rootDir = treeview.insert('', 0, 'project', text='project', value=('project'))
+            rootDir = self.treeview.insert('', 0, 'project', text='project', value=('project'))
             count = 0
             for temp in firstClass: #一级目录
-                tempDir = treeview.insert(rootDir, count, temp, text=temp, value=(temp))
+                tempDir = self.treeview.insert(rootDir, count, temp, text=temp, value=(temp))
                 count += 1
                 firstClassDir.append(tempDir)
-            count = 0
+
+            self.projectDir.append(firstClass)
+            # count = 0
 
             # for temp in secondClass1:#lexer
             #     tempDir = treeview.insert(firstClassDir[0], count, temp, text=temp, value=(temp))
             #     count += 1
             #     if tempDir == 'ui':
             #         uiNode = treeview.insert(tempDir, count, 'UI.py', text='UI.py', value=('UI.py'))
-            # treeview.bind('<Button-1>',selectEvent)
 
-        def config():
-            '''
-            配置主界面
-            :return:
-            '''
-            #错误信息
+            self.treeview.bind('<Button-1>',selectEvent)
+
+        def init_window():
+
+
+            lineframe = Frame(contentframe, bg='white')
+            test = Frame(contentframe)
+            lineframe.pack(side=LEFT, anchor=N, fill=Y)
+            test.pack(side=LEFT, anchor=N, expand=True, fill=BOTH)
+
+            def multiple_yview(*args):
+                self.line.yview(*args)
+                self.content.yview(*args)
+
+            # 代码区的滚动条
+            scY = Scrollbar(test, command=multiple_yview)
+            scX = Scrollbar(test, orient=HORIZONTAL)
+            scY.pack(side=RIGHT, fill=Y)
+            scX.pack(side=BOTTOM, fill=X)
+
+            # 行数和代码显示
+            self.line = Text(lineframe, width=3, yscrollcommand=scY.set)
+            self.line.pack(side=LEFT, fill=Y, expand=True)
+            self.line.configure(background='Gray')
+            self.content = Text(test, width=80, yscrollcommand=scY.set, xscrollcommand=scX.set)
+            self.content.pack(side=LEFT, expand=True, fill=BOTH)
+            scY.config(command=multiple_yview)
+
+            # 文件菜单
+            file_list = ['打开文件', '保存']
+            file_event_list = [open_file, save_file]
+            file_menu = Menu(menubar)
+            for menu, event in zip(file_list, file_event_list):
+                file_menu.add_command(label=menu, command=event)
+            menubar.add_cascade(label='文件', menu=file_menu)
+
+            # 功能菜单
+            # menuList = ['词法规则','词法分析','语法规则','语法分析','语义规则','语义分析']
+            action_list = ['词法分析', '语法分析', '语义分析']
+            # eventList = [lexicalRule,lexicalAnalysis,syntaxRule,syntaxAnalysis,semanticsRule,semanticsAnalysis]
+            action_event_list = [lexicalAnalysis, syntaxAnalysis, semanticsAnalysis]
+            action_menu = Menu(menubar)
+            for menu, event in zip(action_list, action_event_list):
+                action_menu.add_command(label=menu, command=event)
+            menubar.add_cascade(label='功能', menu=action_menu)
+
+            # 配置菜单
+            config_list = ['配置转换表']
+            config_event_list = [read_DFA_table]
+            config_menu = Menu(menubar)
+            for menu, event in zip(config_list, config_event_list):
+                config_menu.add_command(label=menu, command=event)
+            menubar.add_cascade(label='配置', menu=config_menu)
+            root.config(menu=menubar)
+
+            #错误显示
             error = ['error', 'reason']
-            treeview2 = ttk.Treeview(root, height=10, columns=error, show='headings')
-            treeview2.place(x=0, y=600)
-            treeview2.column(error[0], width=50, anchor='center')
+            treeview2 = ttk.Treeview(messageframe, height=10, columns=error, show='headings')
+            width = int(screenwidth/6)
+            treeview2.column(error[0], width= width * 4)
             treeview2.heading(error[0], text=error[0])
-            treeview2.column(error[1], width=1000,anchor='center')
+            treeview2.column(error[1], width=width*2)
             treeview2.heading(error[1], text=error[1])
+            treeview2.pack(side=LEFT,fill=BOTH, expand=True,padx=1)
+
             '''
             需要错误信息返回值
             '''
-
             #项目文件
             projectDir()
+        # 框架设计
+        #frameText = Frame(root)
+        untitleframe = Frame(bg='white')
+        messageframe = Frame(bg='red')
+        projectframe = Frame(untitleframe, bg='red')
+        contentframe = Frame(untitleframe, bg='white')
 
-        #菜单初始化
+        untitleframe.pack(side=TOP, anchor=W, expand=True, fill=BOTH)
+        messageframe.pack(side=BOTTOM, anchor=W)
+        contentframe.pack(side=LEFT, anchor=N, expand=True, fill=BOTH)
+        projectframe.pack(side=TOP, anchor=E,expand=True, fill=BOTH)
         menubar = Menu(root)
+        init_window()
 
-        # 屏幕显示
-        scY = Scrollbar(root)
-        scX = Scrollbar(root, orient=HORIZONTAL)
-        scY.pack(side=RIGHT, fill=Y)
-        scX.pack(side=BOTTOM, fill=X)
-        content = Text(root, width=70, height=30, yscrollcommand=scY.set, xscrollcommand=scX.set)
-        content.place(x=30, y=50)
-
-        # 行数显示
-        line = Text(root, width=3, height=30, yscrollcommand=scY.set)
-        line.place(x=0, y=50)
-        line.configure(background='Gray')
-
-        menuList = ['词法规则','词法分析','语法规则','语法分析','语义规则','语义分析']
-        eventList = [lexicalRule,lexicalAnalysis,syntaxRule,syntaxAnalysis,semanticsRule,semanticsAnalysis]
-        fileOpen = Menu(menubar)
-        fileOpen.add_command(label='打开转换表文件',command=table)
-        fileOpen.add_command(label='打开源文件', command=source)
-        fileOpen.add_command(label='保存', command=save)
-        menubar.add_cascade(label='文件', menu=fileOpen)
-        totalMenu = Menu(menubar)
-        for menu,event in zip(menuList,eventList):
-            totalMenu.add_command(label = menu, command = event)
-        menubar.add_cascade(label='功能', menu=totalMenu)
-        root.config(menu=menubar)
-
-        #配置主界面
-        config()
 
         root.mainloop()
 
