@@ -22,8 +22,8 @@ class LexAnalysis:
         self.lexmeBegin = self.forward
         curstate = 0
         #add
-        currentInput = ''
-        record = ''
+        currentInput = '' # get current input
+        record = ''  # DFA
         while(True):
             prestate = curstate
             if (self.forward == len(self.program)):
@@ -36,7 +36,7 @@ class LexAnalysis:
             record += '<'+str(prestate)+' , '+input+' , '+str(curstate)+'>'
             self.forward += 1
         if(self.forward == self.lexmeBegin):
-            print(".error in program")
+            print(".error in program 1")
             return [currentInput,'error:error in program']
         elif(self.states[prestate].ifaccept()):
             if(self.states[prestate].ifneedattri()):
@@ -54,8 +54,8 @@ class LexAnalysis:
             else:
                 return [currentInput,token,record]
         else:
-            print("error in program")
-            return [currentInput, 'error:error in program']
+            print("error in program 2:"+currentInput)
+            return [currentInput, Token('error:error in program')]
 
     # 初始化词法分析类，从文件读入DFA以及程序实例
     def init(self):
