@@ -47,10 +47,7 @@ class UI:
         def save_file():
             file_text = self.content.get('1.0', END)
 
-            if(self.curfile is None):
-                print("error")
-                return
-            elif(self.curfile in self.filePath.keys()):
+            if(self.curfile in self.filePath.keys()):
                 file_path = self.filePath[self.curfile]
                 print(file_path)
             else:
