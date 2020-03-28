@@ -1,4 +1,4 @@
-from state import State
+from lexer.state import State
 from token import Token
 
 # Non-printable characters
@@ -14,30 +14,36 @@ blank = ['\n', '\r', '\t', ' ']
 class LexAnalysis:
     def __init__(self):
         self.init()
-
+        self.program = None
+        self.row = 1
     # 获得下一个token
     def getnexttoken(self):
         if(self.forward == len(self.program)):
+            self.forward = 0
             return ['end',Token("end")]
         self.lexmeBegin = self.forward
         curstate = 0
         #add
-        currentInput = ''
-        record = ''
+        currentInput = '' # get current input
+        record = ''  # DFA
         while(True):
             prestate = curstate
             if (self.forward == len(self.program)):
                 break
             input = self.program[self.forward]
+            # 记录行
+
             curstate = self.states[curstate].trans(input)
             if(curstate < 0):
                 break
+            if (input == '\n'):
+                self.row += 1
             currentInput += input
             record += '<'+str(prestate)+' , '+input+' , '+str(curstate)+'>'
             self.forward += 1
         if(self.forward == self.lexmeBegin):
-            print(".error in program")
-            return [currentInput,'error:error in program']
+            self.forward += 1
+            return [self.row, Token('error', "不能识别的字符%s" % (self.program[self.lexmeBegin]))]
         elif(self.states[prestate].ifaccept()):
             if(self.states[prestate].ifneedattri()):
                 code = self.states[prestate].code
@@ -54,8 +60,9 @@ class LexAnalysis:
             else:
                 return [currentInput,token,record]
         else:
-            print("error in program")
-            return [currentInput, 'error:error in program']
+
+            return [self.row, Token('error', "%s无法识别" % (currentInput))]
+
 
     # 初始化词法分析类，从文件读入DFA以及程序实例
     def init(self):

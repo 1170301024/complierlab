@@ -1,4 +1,4 @@
-from lexanalysis import LexAnalysis
+from lexer.lexanalysis import LexAnalysis
 test = LexAnalysis()
 
 while(True):

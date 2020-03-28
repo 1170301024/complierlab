@@ -1,8 +1,8 @@
-# 忽略IDEA的项目配置文件
+# 锟斤拷锟斤拷IDEA锟斤拷锟斤拷目锟斤拷锟斤拷锟侥硷拷
 .idea
 venv
 __pycache__
-DFA.aux
-DFA.log
-DFA.synctex.gz
+lexer/DFA.aux
+lexer/DFA.log
+lexer/DFA.synctex.gz
 

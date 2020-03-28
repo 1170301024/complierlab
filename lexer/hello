@@ -18,6 +18,7 @@ switch(m){
   default:
   m = m +6;
 }
+int r = 0x;
 int i;
 for(i = 0;i<10;i++){
   m = m+2;
@@ -29,9 +30,8 @@ struct stack{
 
 int getSum(int x,int y){
    int j = x;
-   int k = y;
+   int k = y;i
    return j+k;
 }
-
-
+getSum(1,2);    /*end*/
 

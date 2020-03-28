@@ -1,9 +1,8 @@
-import os
 import tkinter
 from tkinter import *
 from tkinter import filedialog, ttk
 
-from lexanalysis import LexAnalysis
+from lexer.lexanalysis import LexAnalysis
 
 root = Tk()
 root.title('编译原理实验')
@@ -18,6 +17,7 @@ class UI:
         self.contentList = None
         self.content = None
         self.line = None
+        self.errline = 0
 
         # 当前在content中的文件
         self.curfile = None
@@ -32,12 +32,8 @@ class UI:
         # self.maxSize = 5000*3
         # root.maxsize(self.maxSize,self.maxSize)
 
-    def error(self, errstr):
-        pass
-
-    def message(self, message):
-        pass
-
+        #ErrorTree
+        self.errorTreeview = None
     def root(self):
         """
         主界面：定义菜单以及事件处理
@@ -106,8 +102,6 @@ class UI:
             self.filePath[fileName] = file
             # fileToContent(file)
 
-
-
         def open_file():
             '''
             读取源文件
@@ -147,7 +141,7 @@ class UI:
             # 词法规则
             content = Text(frame, width=70, height=30)
             content.pack(anchor=W, ipadx=10, side=LEFT, expand=False)
-            fileName = '../lexicalRules'
+            fileName = '../lexer/lexicalRules'
             file = open(fileName, 'r', encoding="utf-8")
             strTemp = ''.join(file.readlines())
             content.insert(tkinter.END,strTemp)
@@ -219,63 +213,45 @@ class UI:
             lb = Label(window, text='词法分析', font=('黑体', 16, 'bold'))
             lb.place(relx=0.5, rely=0.0)
             lb1 = Label(window, text='词法单元', font=('黑体', 16, 'bold'))
-            lb1.place(relx=0.10, rely=0.1)
+            lb1.place(relx=0.25, rely=0.1)
             lb1 = Label(window, text='DFA', font=('黑体', 16, 'bold'))
-            lb1.place(relx=0.50, rely=0.1)
-            lb2 = Label(window, text='错误项', font=('黑体', 16, 'bold'))
-            lb2.place(relx=0.80, rely=0.1)
-
+            lb1.place(relx=0.75, rely=0.1)
 
             #词法单元
             type = ['input','token','line']
             treeview = ttk.Treeview(window, height = 19, columns = type,show = 'headings')
             treeview.place(x=30, y=90)
             for head in type:
-                treeview.column(head, width=100, anchor='center')
+                treeview.column(head, width=200, anchor='center')
                 treeview.heading(head, text=head)
-            # # ----vertical scrollbar------------
-            # vbar = ttk.Scrollbar(window, orient=VERTICAL, command=treeview.yview)
-            # treeview.configure(yscrollcommand=vbar.set)
-            # vbar.pack(, fill = Y)
 
             #DFA
+
             menu = ['word','process']
             treeview1 = ttk.Treeview(window, height = 19, columns = menu,show = 'headings')
-            treeview1.place(x=430, y=90)
-            treeview1.column(menu[0], width=50, anchor='center')
+            treeview1.place(x=640, y=90)
+            treeview1.column(menu[0], width=100, anchor='center')
             treeview1.heading(menu[0], text=menu[0])
-            treeview1.column(menu[1], width=300, anchor='center')
+            treeview1.column(menu[1], width=400, anchor='center')
             treeview1.heading(menu[1], text=menu[1])
-            # # ----vertical scrollbar------------
-            # vbar = ttk.Scrollbar(window, orient=VERTICAL, command=treeview1.yview)
-            # treeview1.configure(yscrollcommand=vbar.set)
-            # vbar.pack(side = RIGHT, fill = Y)
 
-            #错误
-            error = ['error','reason']
-            treeview2 = ttk.Treeview(window, height = 19, columns = error,show = 'headings')
-            treeview2.place(x=830, y=90)
-            treeview2.column(error[0], width=50, anchor='center')
-            treeview2.heading(error[0], text=error[0])
-            treeview2.column(error[1], width=300, anchor='center')
-            treeview2.heading(error[1], text=error[1])
-            # # ----vertical scrollbar------------
-            # vbar = ttk.Scrollbar(window, orient=VERTICAL, command=treeview2.yview)
-            # treeview2.configure(yscrollcommand=vbar.set)
-            # vbar.pack(side = RIGHT, fill = Y)
-            #handle
             currentLine = 0
             i = 0
-            while True and not self.lexical:
+            while True:
                 recieve = self.lexer.getnexttoken()
-                # if 'error' in recieve[1]:
-                #     treeview2.insert('',i,value=recieve[1])
                 input = recieve[0]
-                while input not in self.contentList[currentLine]:
-                    currentLine += 1
                 token = recieve[1]
+                if (token.code == 'error'):
+                    print(token.attr)
+                    errorHandler(input, token)
+                    continue
+
+                while input not in self.contentList[currentLine]: #行号记录
+                    currentLine += 1
+
                 if (token.code == "end"):
                     break
+
                 record = recieve[2]
                 # print(input, ' ', token, ' ', currentLine, '\n')
                 treeview.insert('', i, value=(input, token, currentLine + 1))
@@ -335,6 +311,10 @@ class UI:
 
             self.treeview.bind('<Button-1>',selectEvent)
 
+        def errorHandler(input,errortoken):
+            self.errorTreeview.insert('', self.errline, value=(input, errortoken.attr))
+            self.errline += 1
+
         def init_window():
 
 
@@ -390,13 +370,13 @@ class UI:
 
             #错误显示
             error = ['error', 'reason']
-            treeview2 = ttk.Treeview(messageframe, height=10, columns=error, show='headings')
+            self.errorTreeview = ttk.Treeview(messageframe, height=10, columns=error, show='headings')
             width = int(screenwidth/6)
-            treeview2.column(error[0], width= width * 4)
-            treeview2.heading(error[0], text=error[0])
-            treeview2.column(error[1], width=width*2)
-            treeview2.heading(error[1], text=error[1])
-            treeview2.pack(side=LEFT,fill=BOTH, expand=True,padx=1)
+            self.errorTreeview.column(error[0], width= width*2)
+            self.errorTreeview.heading(error[0], text=error[0])
+            self.errorTreeview.column(error[1], width=width*4)
+            self.errorTreeview.heading(error[1], text=error[1])
+            self.errorTreeview.pack(side=LEFT,fill=BOTH, expand=True,padx=1)
 
             '''
             需要错误信息返回值
