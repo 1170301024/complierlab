@@ -1,6 +1,6 @@
 import tkinter
 from tkinter import *
-from tkinter import filedialog, ttk
+from tkinter import filedialog, ttk ,messagebox
 
 from lexer.lexanalysis import LexAnalysis
 
@@ -34,12 +34,14 @@ class UI:
 
         #ErrorTree
         self.errorTreeview = None
+
     def root(self):
         """
         主界面：定义菜单以及事件处理
         :return:void
         """
-        #相应列表
+
+        #保存文件到相应文件
         def save_file():
             file_text = self.content.get('1.0', END)
 
@@ -57,6 +59,7 @@ class UI:
             else:
                 print('文件未保存')
 
+        #辅助函数：读文件
         def read_file():
             '''
             读取系统文件，返回文件名
@@ -66,12 +69,8 @@ class UI:
             print('打开文件', file_path)
             return file_path
 
+        #前端显示文件
         def fileToContent(file):
-            '''
-            读取文件到前端
-            :param file:
-            :return:
-            '''
             file_program = open(file, "r", encoding="utf-8")
             self.contentList = file_program.readlines()
             str_data = ''.join(self.contentList)
@@ -84,11 +83,8 @@ class UI:
                     continue
                 self.line.insert(tkinter.END,'\n'+str(i+1))
 
+        #读取转换表：lexer
         def read_DFA_table():
-            '''
-            读取转换表
-            :return: void
-            '''
             file = read_file()
             if file == '':
                 return
@@ -102,11 +98,8 @@ class UI:
             self.filePath[fileName] = file
             # fileToContent(file)
 
+        #打开文件，读取源文件
         def open_file():
-            '''
-            读取源文件
-            :return: void
-            '''
             file = read_file()
             if file == '':
                 return
@@ -201,11 +194,18 @@ class UI:
                     treeview.set(temp,column=j, value=i.transfunc[j])
                 count += 1
 
+        #词法分析
         def lexicalAnalysis():
             '''
             词法分分析情况：token序列，识别过程，错误情况
             :return:
             '''
+            if self.lexer.program == None:
+                tkinter.messagebox.showinfo('提示', '未读取分析文件')
+                return
+            if self.lexer.states == None:
+                tkinter.messagebox.showinfo('提示', '未读取转换表文件')
+                return
             window = Tk()
             window.title('词法分析')
             window.geometry('1200x600')
@@ -217,26 +217,55 @@ class UI:
             lb1 = Label(window, text='DFA', font=('黑体', 16, 'bold'))
             lb1.place(relx=0.75, rely=0.1)
 
+            frame = Frame(window)
+            # frame.place(x=630, y=90)
+            frame.pack(anchor=W, ipadx=10, side=LEFT, expand=True, fill = X)
+            frame1 = Frame(window)
+            frame1.pack(anchor=E, ipadx=10, side=LEFT, expand=True, fill = X)
+            # tianchong
+            content = Text(frame, width=0, height=30)
+            content.pack(anchor=W, side=LEFT, expand=False)
+            content.configure(background=window.cget('background'),highlightbackground=window.cget('background'))
+            content1 = Text(frame1, width=0, height=30)
+            content1.pack(anchor=E, side=LEFT, expand=False)
+            content1.configure(background=window.cget('background'),highlightbackground=window.cget('background'))
             #词法单元
             type = ['input','token','line']
-            treeview = ttk.Treeview(window, height = 19, columns = type,show = 'headings')
-            treeview.place(x=30, y=90)
+            treeview = ttk.Treeview(frame, height = 19, columns = type,show = 'headings')
+            treeview.pack(anchor=W, ipadx=100, side=LEFT, expand=True, fill=BOTH)
             for head in type:
                 treeview.column(head, width=200, anchor='center')
                 treeview.heading(head, text=head)
-
+            # ----vertical scrollbar------------
+            vbar = ttk.Scrollbar(treeview, orient=VERTICAL, command=treeview.yview)
+            treeview.configure(yscrollcommand=vbar.set)
+            vbar.pack(side=RIGHT, fill=Y)
+            # ----horizontal scrollbar----------
+            hbar = ttk.Scrollbar(treeview, orient=HORIZONTAL, command=treeview.xview)
+            treeview.configure(xscrollcommand=hbar.set)
+            hbar.pack(side=BOTTOM, fill=X)
             #DFA
 
             menu = ['word','process']
-            treeview1 = ttk.Treeview(window, height = 19, columns = menu,show = 'headings')
-            treeview1.place(x=640, y=90)
+            treeview1 = ttk.Treeview(frame1, height = 19, columns = menu,show = 'headings')
+            treeview1.pack(anchor=W, ipadx=100, side=LEFT, expand=True, fill=BOTH)
             treeview1.column(menu[0], width=100, anchor='center')
             treeview1.heading(menu[0], text=menu[0])
             treeview1.column(menu[1], width=400, anchor='center')
             treeview1.heading(menu[1], text=menu[1])
+            # ----vertical scrollbar------------
+            vbar1 = ttk.Scrollbar(treeview1, orient=VERTICAL, command=treeview1.yview)
+            treeview1.configure(yscrollcommand=vbar1.set)
+            vbar1.pack(side=RIGHT, fill=Y)
+            # ----horizontal scrollbar----------
+            hbar1 = ttk.Scrollbar(treeview1, orient=HORIZONTAL, command=treeview1.xview)
+            treeview1.configure(xscrollcommand=hbar1.set)
+            hbar1.pack(side=BOTTOM, fill=X)
+            window.rowconfigure(0, weight=1)
+            window.columnconfigure(0, weight=1)
 
             currentLine = 0
-            i = 0
+            clear(self.errorTreeview)
             while True:
                 recieve = self.lexer.getnexttoken()
                 input = recieve[0]
@@ -245,18 +274,14 @@ class UI:
                     print(token.attr)
                     errorHandler(input, token)
                     continue
-
                 while input not in self.contentList[currentLine]: #行号记录
                     currentLine += 1
-
                 if (token.code == "end"):
                     break
-
                 record = recieve[2]
                 # print(input, ' ', token, ' ', currentLine, '\n')
-                treeview.insert('', i, value=(input, token, currentLine + 1))
-                treeview1.insert('',i, value=(input,record))
-                i += 1
+                treeview.insert('', 'end', value=(input, token, currentLine + 1))
+                treeview1.insert('','end', value=(input,record))
             self.lexical = True
             window.mainloop()
 
@@ -314,6 +339,15 @@ class UI:
         def errorHandler(input,errortoken):
             self.errorTreeview.insert('', self.errline, value=(input, errortoken.attr))
             self.errline += 1
+
+        '''
+        清空表
+        input: type of treeview
+        '''
+        def clear(tree):
+            x = tree.get_children()
+            for item in x:
+                tree.delete(item)
 
         def init_window():
 

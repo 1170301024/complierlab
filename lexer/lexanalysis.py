@@ -20,6 +20,7 @@ class LexAnalysis:
     def getnexttoken(self):
         if(self.forward == len(self.program)):
             self.forward = 0
+            self.row = 1
             return ['end',Token("end")]
         self.lexmeBegin = self.forward
         curstate = 0
@@ -43,7 +44,7 @@ class LexAnalysis:
             self.forward += 1
         if(self.forward == self.lexmeBegin):
             self.forward += 1
-            return [self.row, Token('error', "不能识别的字符%s" % (self.program[self.lexmeBegin]))]
+            return [self.row, Token('error', "不能识别的字符:'%s'" % (self.program[self.lexmeBegin]))]
         elif(self.states[prestate].ifaccept()):
             if(self.states[prestate].ifneedattri()):
                 code = self.states[prestate].code
@@ -61,7 +62,7 @@ class LexAnalysis:
                 return [currentInput,token,record]
         else:
 
-            return [self.row, Token('error', "%s无法识别" % (currentInput))]
+            return [self.row, Token('error', "'%s'无法识别" % (currentInput))]
 
 
     # 初始化词法分析类，从文件读入DFA以及程序实例
@@ -76,6 +77,7 @@ class LexAnalysis:
         # self.program = file_program.read()
         self.lexmeBegin = 0
         self.forward = 0
+        self.states = None
         #从文件读入程序放入缓存区
 
     def initDFA(self, path):
