@@ -12,6 +12,8 @@ screenheight = root.winfo_screenheight()
 
 
 class UI:
+    errorTreeview = None
+
     def __init__(self, lexer):
         self.lexer = lexer
         self.contentList = None
@@ -33,7 +35,11 @@ class UI:
         # root.maxsize(self.maxSize,self.maxSize)
 
         #ErrorTree
-        self.errorTreeview = None
+
+    @staticmethod
+    def error(e):
+        print(str)
+
     def root(self):
         """
         主界面：定义菜单以及事件处理
