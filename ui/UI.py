@@ -206,6 +206,10 @@ class UI:
             if self.lexer.states == None:
                 tkinter.messagebox.showinfo('提示', '未读取转换表文件')
                 return
+            self.lexer.program = self.content.get('0.0','end')
+            self.contentList = self.content.get("0.0","end").split("\n")
+            self.contentList.pop()#列表最后一个元素是空删除它
+
             window = Tk()
             window.title('词法分析')
             window.geometry('1200x600')
@@ -247,11 +251,11 @@ class UI:
             #DFA
 
             menu = ['word','process']
-            treeview1 = ttk.Treeview(frame1, height = 19, columns = menu,show = 'headings')
+            treeview1 = ttk.Treeview(frame1,  height = 19, columns = menu,show = 'headings')
             treeview1.pack(anchor=W, ipadx=100, side=LEFT, expand=True, fill=BOTH)
-            treeview1.column(menu[0], width=100, anchor='center')
+            treeview1.column(menu[0], width=100, anchor='center',stretch=False)
             treeview1.heading(menu[0], text=menu[0])
-            treeview1.column(menu[1], width=400, anchor='center')
+            treeview1.column(menu[1], width=1000, anchor='center',stretch=False)
             treeview1.heading(menu[1], text=menu[1])
             # ----vertical scrollbar------------
             vbar1 = ttk.Scrollbar(treeview1, orient=VERTICAL, command=treeview1.yview)
@@ -263,6 +267,10 @@ class UI:
             hbar1.pack(side=BOTTOM, fill=X)
             window.rowconfigure(0, weight=1)
             window.columnconfigure(0, weight=1)
+
+            content2 = Text(frame1, width=0, height=30)
+            content2.pack(anchor=W, side=LEFT, expand=False)
+            content2.configure(background=window.cget('background'), highlightbackground=window.cget('background'))
 
             currentLine = 0
             clear(self.errorTreeview)

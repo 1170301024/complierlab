@@ -18,7 +18,7 @@ switch(m){
   default:
   m = m +6;
 }
-int r = 0x;
+int r = 0x12;
 int i;
 for(i = 0;i<10;i++){
   m = m+2;
@@ -34,4 +34,5 @@ int getSum(int x,int y){
    return j+k;
 }
 getSum(1,2);    /*end*/
+
 
