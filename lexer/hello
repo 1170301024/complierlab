@@ -1,24 +1,24 @@
 int m,z=0x12;
 m = 2+3*4;
-char c= 'a';
+char c= 'au'; /**/
 double b = 1;
 int[2][4] h;
-int[3] a;
+int[3] a "“; /**/
 a[0] = 2;
-while(m>2)
+while(m!=2)
 do
 if(m<8)
 m = m +1;
-else m = m*2;
+else m = m*02; /*error*/
 switch(m){
   case 1:
-  m = m +1;
+  2m = m +1;   /*error*/
   case 2:
-  m = m + 3;
+  m = m + 3E-2.0;  /*error*/
   default:
-  m = m +6;
+  m = m +0.6;
 }
-int r = 0x;
+int r = 0x2;
 int i;
 for(i = 0;i<10;i++){
   m = m+2;
@@ -34,4 +34,7 @@ int getSum(int x,int y){
    return j+k;
 }
 getSum(1,2);    /*end*/
+
+
+
 

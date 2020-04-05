@@ -1,6 +1,6 @@
 # DFA transform table
 # stateq input statep token
-stotal 80
+stotal 49
 KEYWORDS auto break case char const continue default double else enum extern float for goto int long register return short sighed sizeof struct switch typedef union unsigned void volatile while
 # id
 0 a-z 26 <id,?>
@@ -73,6 +73,9 @@ KEYWORDS auto break case char const continue default double else enum extern flo
 38 x 40
 40 0-9 41 <hex,?>
 41 0-9 41
+38 \. 47
+47 0-9 48 <fconst,?>
+48 0-9 48
 
 # comment
 0 / 42

@@ -137,6 +137,11 @@
 		\node[state] (c15) [below of= c10]{$S_{40}$};
 		\node[state, accepting] (c16) [right of= c15]{$S_{41}$};
 		
+		% 小数
+		\node[state] (c17) [left of= c15]{$S_{47}$};
+		\node[state, accepting] (c18) [below of= c17]{$S_{48}$};
+		
+		
 		\path[->]
 		(c1) edge node [above] {1-9} (c2)
 		(c2) edge [loop above] node  {0-9} (c2)
@@ -168,7 +173,14 @@
 		(c10) edge [left] node  {x} (c15)
 		(c14) edge [loop right] node  {0-9} (c14)
 		(c15) edge [above] node  {0-9} (c16)
-		(c16) edge [loop right] node  {0-9} (c16);
+		(c16) edge [loop right] node  {0-9} (c16)
+		
+		% 小数
+		(c10) edge [above] node  {.} (c17)
+		(c17) edge [left] node  {0-9} (c18)
+		(c18) edge [loop right] node  {0-9} (c18);
+		
+		
 		
 		\end{tikzpicture}
 	
@@ -205,17 +217,6 @@
 		
 		
 	\end{enumerate}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+		
 \end{document}
 
