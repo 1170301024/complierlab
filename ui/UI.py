@@ -24,9 +24,6 @@ class UI:
         # 当前在content中的文件
         self.curfile = None
 
-        #If lexical Analyse or not
-        self.lexical = False
-
         #ProjectTree
         self.treeview = None
         self.projectDir = []
@@ -120,6 +117,9 @@ class UI:
             词法规则界面以及dfa转换表构建
             :return: void
             '''
+            if self.lexer.states == None:
+                tkinter.messagebox.showinfo('提示', '未读取转换表文件')
+                return
             window = Tk()
             window.title('词法规则')
             window.geometry('1200x600')
@@ -146,10 +146,10 @@ class UI:
             column = set() # 集合，元素不重复
             totalStates = self.lexer.states # (终结符，终止态)
             lines = len(totalStates)
-            count = 1
-            endState = []
+            count = 0
+            endState = [] #储存接收状态  加（end）
             for i in totalStates:
-                if i.ifaccept():
+                if i.ifaccept(): #接收状态
                     endState.append(count)
                 count+=1
                 for j in i.transfunc.keys(): #dict_keys([]) 迭代形式
@@ -186,11 +186,11 @@ class UI:
 
 
             # 表格
-            count = 1
+            count = 0
             for i in totalStates:
                 temp = treeview.insert('', index = count) # 新建行
-                if count in endState:
-                    treeview.set(temp, column=column[0], value=str(count)+'(end)')
+                if count in endState: #若为接收状态
+                    treeview.set(temp, column=column[0], value='*'+str(count))
                 else:
                     treeview.set(temp, column=column[0], value=count)
                 for j in i.transfunc.keys():  # dict_keys([]) 迭代形式
@@ -209,6 +209,10 @@ class UI:
             if self.lexer.states == None:
                 tkinter.messagebox.showinfo('提示', '未读取转换表文件')
                 return
+            self.lexer.program = self.content.get('0.0','end')
+            self.contentList = self.content.get("0.0","end").split("\n")
+            self.contentList.pop()#列表最后一个元素是空删除它
+
             window = Tk()
             window.title('词法分析')
             window.geometry('1200x600')
@@ -250,12 +254,12 @@ class UI:
             #DFA
 
             menu = ['word','process']
-            treeview1 = ttk.Treeview(frame1, height = 19, columns = menu,show = 'headings')
+            treeview1 = ttk.Treeview(frame1,  height = 19, columns = menu,show = 'headings')
             treeview1.pack(anchor=W, ipadx=100, side=LEFT, expand=True, fill=BOTH)
-            treeview1.column(menu[0], width=100, anchor='center')
+            treeview1.column(menu[0], width=100, anchor='center',stretch=False)
             treeview1.heading(menu[0], text=menu[0])
-            treeview1.column(menu[1], width=400, anchor='center')
-            treeview1.heading(menu[1], text=menu[1])
+            treeview1.column(menu[1], width=1000, anchor='w',stretch=False)
+            treeview1.heading(menu[1], text=menu[1], anchor='w')
             # ----vertical scrollbar------------
             vbar1 = ttk.Scrollbar(treeview1, orient=VERTICAL, command=treeview1.yview)
             treeview1.configure(yscrollcommand=vbar1.set)
@@ -266,6 +270,10 @@ class UI:
             hbar1.pack(side=BOTTOM, fill=X)
             window.rowconfigure(0, weight=1)
             window.columnconfigure(0, weight=1)
+
+            content2 = Text(frame1, width=0, height=30)
+            content2.pack(anchor=W, side=LEFT, expand=False)
+            content2.configure(background=window.cget('background'), highlightbackground=window.cget('background'))
 
             currentLine = 0
             clear(self.errorTreeview)
@@ -388,9 +396,9 @@ class UI:
 
             # 功能菜单
             # menuList = ['词法规则','词法分析','语法规则','语法分析','语义规则','语义分析']
-            action_list = ['词法分析', '语法分析', '语义分析']
+            action_list = ['DFA转换表','词法分析', '语法分析', '语义分析']
             # eventList = [lexicalRule,lexicalAnalysis,syntaxRule,syntaxAnalysis,semanticsRule,semanticsAnalysis]
-            action_event_list = [lexicalAnalysis, syntaxAnalysis, semanticsAnalysis]
+            action_event_list = [lexicalRule,lexicalAnalysis, syntaxAnalysis, semanticsAnalysis]
             action_menu = Menu(menubar)
             for menu, event in zip(action_list, action_event_list):
                 action_menu.add_command(label=menu, command=event)
@@ -406,13 +414,13 @@ class UI:
             root.config(menu=menubar)
 
             #错误显示
-            error = ['error', 'reason']
+            error = ['errorline', 'hint']
             self.errorTreeview = ttk.Treeview(messageframe, height=10, columns=error, show='headings')
             width = int(screenwidth/6)
             self.errorTreeview.column(error[0], width= width*2)
-            self.errorTreeview.heading(error[0], text=error[0])
+            self.errorTreeview.heading(error[0], text=error[0],anchor="w")
             self.errorTreeview.column(error[1], width=width*4)
-            self.errorTreeview.heading(error[1], text=error[1])
+            self.errorTreeview.heading(error[1], text=error[1],anchor="w")
             self.errorTreeview.pack(side=LEFT,fill=BOTH, expand=True,padx=1)
 
             '''

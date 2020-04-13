@@ -1,24 +1,24 @@
-标识符： letter_ -> a|b|c|...|z|A|B|C|...|Z
-         digit   -> 0|1|2|3|4|5|6|7|8|9
-         id -> letter_(letter_|digit)*
+标识符： letter_ -> a|b|c|...|z|A|B|C|...|Z|_
+        digit -> 0|1|2|3|4|5|6|7|8|9
+        id -> letter_(letter_|digit)*
 
 常数：   digits -> digit digit*
-         optionalFraction -> .digits|ε
-         optionalExponent -> E(+|-|ε)digits|ε
-         number -> digits optionalFraction optionalExponent
+        optionalFraction -> .digits|ε
+        optionalExponent -> E(+|-|ε)digits|ε
+        number -> digits optionalFraction optionalExponent
 
-运算符： op -> + | - | * | / | += | -= | *= | /= | % | != | == | > | < | >= | <= | >> | << | && |  ||  | !
+运算符： op -> + | - | * | / | % | != | == | > | < | >= | <= | && | ||
 
-界符：   Boundary -> { | } | [ | ] | ( | ) | , | ; | : | ?
+界符：   Boundary -> { | } | [ | ] | ( | ) | , | . | ; | : | ?
 
-注释：   NOTE -> /*other*/
-         other指代其它字符
+注释：   NOTE -> / * (.)* */
+            . 指任意字符
 
 8进制：  OCT -> 0(1|2|3|4|5|6|7)（0|1|2|3|4|5|6|7）*
 
 16进制： HEX -> 0x(1|…|9|a|…|f) (0|…|9|a|…|f)*
 
-字符常数：char -> ' (a|b|c|...|z|A|B|C|...|Z) '
+字符常数：cconst -> ' (a|b|c|...|z|A|B|C|...|Z) '
 
-字符串常数：string ->'(any)*'|"(any)*"
-            any指任意字符
+字符串常数：string ->"(.)*"
+            . 指任意字符

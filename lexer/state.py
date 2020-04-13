@@ -5,6 +5,9 @@ class State():
         #每个状态转换函数表示为字典的形式
         self.transfunc = {}
         self.acc = False
+        self.code = None
+        self.attr = None
+
 
 
 
