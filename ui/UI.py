@@ -442,7 +442,6 @@ class UI:
         menubar = Menu(root)
         init_window()
 
-
         root.mainloop()
 
 

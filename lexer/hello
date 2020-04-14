@@ -1,24 +1,23 @@
 int m,z=0x12;
 m = 2+3*4;
-char c= 'au'; /*char const error*/
+char c= 'a';
 double b = 1;
 int[2][4] h;
-int[3] a "“; /*error character*/
+int[3] a;
 a[0] = 2;
-while(m!=2)
+while(m>2)
 do
 if(m<8)
 m = m +1;
-else m = m*02; /*oct*/
+else m = m*2;
 switch(m){
   case 1:
-  2m = m +1;   /*error id*/
+  m = m +1;
   case 2:
-  m = m + 3E-2.0;  /*error E*/
+  m = m + 3;
   default:
-  m = m +0.6;
+  m = m +6;
 }
-
 int r = 0x12;
 int i;
 for(i = 0;i<10;i++){
@@ -35,7 +34,6 @@ int getSum(int x,int y){
    return j+k;
 }
 getSum(1,2);    /*end*/
-
 
 
 
