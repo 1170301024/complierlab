@@ -192,7 +192,21 @@ class Parser:
         :param G: 增广文法
         :return:
         '''
-        self.item_family = []
+        # 初始化项集族为[G->.p, $]
+        self.item_family = [self.closure(Item(G.start_symbol(), ['$'])),]
+        for I in self.item_family:
+            # 获得该项集中所有的下一个symbol
+            all_symbols = []
+            for i in I:
+                one_symbol = i.next_symbol()
+                if one_symbol is not None:
+                    all_symbols += one_symbol
+            for s in all_symbols:
+                new_I = self.goto(I, s)
+                if new_I is not None and new_I not in self.item_family:
+                    self.item_family.append(new_I)
+
+
 
     def table(self, G):
         '''
