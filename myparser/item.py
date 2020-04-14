@@ -40,7 +40,7 @@ class Item:
         if self.__loc >= len(self.body) - 1:
             return None, self.symbols
         else:
-            return self.body[self.__loc], self.symbols
+            return self.body[self.__loc + 1:], self.symbols
 
     def next_item(self, symbols):
         '''
@@ -65,7 +65,8 @@ class Item:
         for c in self.body:
             if self.__loc == i:
                 item_str += '.'
-            item_str += str(c)
+            item_str += str(c) + ' '
+            i += 1
         if self.__loc == len(self.body):
             item_str += '.'
         item_str += ']'

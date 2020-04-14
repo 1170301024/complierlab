@@ -58,8 +58,8 @@ class Cfg:
         # if-else语句
         # IS -> IF ( E ) S
         # IS -> IF ( E ) S ELSE S
-        reserve(Nonterminal('IS'), [Nonterminal('IF'), Terminal(Tag.SLP, '('), Nonterminal('E'), Terminal(Tag.SRP, ')'), Nonterminal('S')])
-        reserve(Nonterminal('IS'), [Nonterminal('IF'), Terminal(Tag.SLP, '('), Nonterminal('E'), Terminal(Tag.SRP, ')'),
+        reserve(Nonterminal('IS'), [Terminal(Tag.IF,'IF'), Terminal(Tag.SLP, '('), Nonterminal('E'), Terminal(Tag.SRP, ')'), Nonterminal('S')])
+        reserve(Nonterminal('IS'), [Terminal(Tag.IF,'IF'), Terminal(Tag.SLP, '('), Nonterminal('E'), Terminal(Tag.SRP, ')'),
                                     Nonterminal('S'), Terminal(Tag.ELSE, 'ELSE'), Nonterminal('S')])
 
         # while语句
@@ -108,20 +108,21 @@ class Cfg:
         reserve(Nonterminal('FAD'), [Nonterminal('T'), Terminal(Tag.ID, 'ID'), Terminal(Tag.COM, ','), Nonterminal('FAD')])
         # 表达式
         # E -> EB | EO
-        reserve(Nonterminal('E'), [Nonterminal('EB')])
-        reserve(Nonterminal('E'), [Nonterminal('EO')])
+        # reserve(Nonterminal('E'), [Nonterminal('EB')])
+        # reserve(Nonterminal('E'), [Nonterminal('EO')])
         # 算术表达式
         # EO -> EO + TO | EO - TO | TO
         # TO -> TO * FO | TO / FO | FO
         # FO -> ( EO ) | ID | FCONST | CONST | CCONST
-        reserve(Nonterminal('EO'), [Nonterminal('EO'), Terminal(Tag.ADD, '+'), Nonterminal('TO')])
-        reserve(Nonterminal('EO'), [Nonterminal('EO'), Terminal(Tag.SUB, '-'), Nonterminal('TO')])
-        reserve(Nonterminal('EO'), [Nonterminal('TO')])
+        reserve(Nonterminal('E'), [Nonterminal('E'), Terminal(Tag.ADD, '+'), Nonterminal('TO')])
+        reserve(Nonterminal('E'), [Nonterminal('E'), Terminal(Tag.SUB, '-'), Nonterminal('TO')])
+        reserve(Nonterminal('E'), [Nonterminal('TO')])
         reserve(Nonterminal('TO'), [Nonterminal('TO'), Terminal(Tag.MUILT, '*'), Nonterminal('FO')])
         reserve(Nonterminal('TO'), [Nonterminal('TO'), Terminal(Tag.DIV, '/'), Nonterminal('FO')])
-        reserve(Nonterminal('FO'), [Terminal(Tag.SLP, '('), Nonterminal('EO'), Terminal(Tag.SRP, ')')])
+        reserve(Nonterminal('FO'), [Terminal(Tag.SLP, '('), Nonterminal('E'), Terminal(Tag.SRP, ')')])
         reserve(Nonterminal('FO'), [Terminal(Tag.ID, 'ID')])
-        for const in [[Terminal(Tag.FCONST, 'FCONST')], ['CONST'], [Terminal(Tag.CCONST, 'CCONST')]]:
+        for const in [[Terminal(Tag.FCONST, 'FCONST')], [Terminal(Tag.HEX, 'HEX')], [Terminal(Tag.OCTAL, 'OCTAL')],
+                      [Terminal(Tag.DECIMAL, 'DECIMAL')], [Terminal(Tag.CCONST, 'CCONST')]]:
             reserve(Nonterminal('FO'), const)
 
         # 逻辑表达式
@@ -129,10 +130,10 @@ class Cfg:
         # EB -> EB1 AND EB2
         # EB -> NOT EB1
         # EB -> E1 REL E2
-        for e in [[Nonterminal('EB'), Terminal(Tag.OR, '||'), Nonterminal('EB')],
-                  [Nonterminal('EB'), Terminal(Tag.AND, '&&'), Nonterminal('EB')],
-                  [Terminal(Tag.NOT, '!'), Nonterminal('EB')], [Nonterminal('E'), Terminal(Tag.REL, 'REL'), Nonterminal('E')]]:
-            reserve(Nonterminal('EB'), e)
+        for e in [[Nonterminal('E'), Terminal(Tag.OR, '||'), Nonterminal('E')],
+                  [Nonterminal('E'), Terminal(Tag.AND, '&&'), Nonterminal('E')],
+                  [Terminal(Tag.NOT, '!'), Nonterminal('E')], [Nonterminal('E'), Terminal(Tag.REL, 'REL'), Nonterminal('E')]]:
+            reserve(Nonterminal('E'), e)
 
         # 附加文法
         # 类型

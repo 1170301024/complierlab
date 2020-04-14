@@ -60,3 +60,6 @@ class Tag:
     QM = 310
 
     ASSIGN = 311
+
+    END = 312
+    IF = 313
