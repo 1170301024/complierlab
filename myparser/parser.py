@@ -57,8 +57,6 @@ class Parser:
                 if new_I is not None and new_I not in self.item_family:
                     self.item_family.append(new_I)
 
-
-
     def table(self, G):
         '''
         G的规范LR语法分析器的函数action和goto
@@ -75,4 +73,5 @@ class Parser:
 
         self.table(self.cfg)
         pass
+
 
