@@ -48,8 +48,8 @@ class Cfg:
         # 程序
         # P -> S S
         # S -> e
-        reserve(Nonterminal('P'), [Nonterminal('S'), Nonterminal('S')])
-        reserve(Nonterminal('S'), [Empty()])
+        reserve(Nonterminal('P'), [Nonterminal('S')])
+        reserve(Nonterminal('S'), [Nonterminal('S'), Nonterminal('S')])
 
         # 语句
         # S ->  DS | IS | WS | DES | DOS | AS | FCS | FRS | FDS | FS
@@ -200,6 +200,7 @@ class Cfg:
         :return: 产生式的集合
         '''
         if not isinstance(nontermial, Nonterminal) :
+            raise TypeError
             print("参数错误，需要传入一个Nonterminal类型的变量")
         result = []
         for rule in self.R:
@@ -293,6 +294,8 @@ class Production:
         self.body = body
 
     def get_num_body_smybol(self):
+        if len(self.body) == 1 and isinstance(self.body[0], Empty):
+            return 0
         return len(self.body)
 
     def get_header(self):

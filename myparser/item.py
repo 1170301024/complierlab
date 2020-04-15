@@ -1,5 +1,8 @@
 import copy
 
+from myparser.cfg import Empty
+
+
 class Item:
     '''
     用于表示LR分析中的项
@@ -24,6 +27,8 @@ class Item:
         如果没有符号，那么返回None
         :return:
         '''
+        if len(self.body) == 1 and isinstance(self.body[0], Empty):
+            return None
         if self.__loc == len(self.body) :
             return None
         else:
@@ -51,6 +56,8 @@ class Item:
         if self.__loc == len(self.body):
             print("无法获得下一个项")
             return None
+        if len(self.body) == 1 and isinstance(self.body[0], Empty):
+            return None
 
         new_item = copy.deepcopy(self)
         new_item.__loc += 1
@@ -68,14 +75,18 @@ class Item:
     def __str__(self):
         item_str = ''
         item_str +='[' + str(self.header) + ' -> '
-        i = 0
-        for c in self.body:
-            if self.__loc == i:
+
+        if len(self.body) == 1 and isinstance(self.body[0], Empty):
+            item_str += ' . '
+        else :
+            i = 0
+            for c in self.body:
+                if self.__loc == i:
+                    item_str += '.'
+                item_str += str(c) + ' '
+                i += 1
+            if self.__loc == len(self.body):
                 item_str += '.'
-            item_str += str(c) + ' '
-            i += 1
-        if self.__loc == len(self.body):
-            item_str += '.'
         item_str += ','
         for s in self.symbols:
             item_str += str(s) + " "

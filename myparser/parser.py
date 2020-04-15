@@ -149,7 +149,7 @@ class Parser:
                 if isinstance(symbol, Terminal):  # 终结符
                     if symbol not in result:
                         result.append(symbol)
-                        return result
+                    return result
 
                 currentFirst.extend(reduction(symbol))  # 非终结符
                 if containNull(currentFirst):
@@ -283,8 +283,8 @@ class Parser:
         while look.character != Tag.FINISH:
             state_actions =  self.actions[state_stack[-1]]
             error_flag1 = True
-            print(look)
             print(state_stack)
+            print(look)
             for action in state_actions:
                 # print(action[0].character)
                 if action[0] == look:
@@ -300,12 +300,13 @@ class Parser:
                         print('r')
                         production = action[2]
                         num_of_s = production.get_num_body_smybol()
+                        print(production)
                         for i in range(num_of_s):
                             state_stack.pop()
                         goto_action = self.gotos[state_stack[-1]]
                         error_flag = True
                         for action in goto_action:
-                            if action[0] == production:
+                            if action[0] == production.header:
                                 error_flag = False
                                 state_stack.append(action[1])
                         if error_flag:
