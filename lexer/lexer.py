@@ -1,3 +1,4 @@
+from lexer.Tag import Tag
 from lexer.state import State
 from token import Token
 
@@ -9,7 +10,7 @@ NPC = ['\x00', '\x01', '\x02', '\x03', '\x04', '\x05', '\x06', '\x07', '\x08', '
 
 blank = ['\n', '\r', '\t', ' ']
 
-class LexAnalysis:
+class Lexer:
     def __init__(self):
         self.init()
         self.program = None
@@ -19,7 +20,7 @@ class LexAnalysis:
         if(self.forward == len(self.program)):
             self.forward = 0
             self.row = 1
-            return ['end',Token("end")]
+            return ['end',Token(Tag.FINISH)]
         self.lexmeBegin = self.forward
         curstate = 0
         #add
@@ -48,13 +49,13 @@ class LexAnalysis:
                 code = self.states[prestate].code
                 value = self.program[self.lexmeBegin:self.forward]
                 # 判断是否是关键字
-                if(code == "id" and value in self.keywords):
-                    token = Token(value)
+                if(code == Tag.ID and value in self.keywords):
+                    token = Token(Tag.keys_dirt[value])
                 else:
                     token = Token(code, value)
             else:
                 token = Token(self.states[prestate].code, self.states[prestate].attr)
-            if(token.code == "delimiter"):
+            if(token.code == Tag.DELIMITER):
                 return self.getnexttoken()
             else:
                 return [currentInput,token,record]
@@ -107,7 +108,7 @@ class LexAnalysis:
             # 处理第四部分token
             if len(parts) == 4:
                 unit = parts[3][1:-1].split(',')
-                code = unit[0]
+                code = int(unit[0])
                 if(len(unit) == 1):
                     self.states[dstate].settoken(code)
                 elif(len(unit) == 2):

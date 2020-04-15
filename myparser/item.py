@@ -10,6 +10,7 @@ class Item:
         使用产生式产生第一个项
         即 由A -> BC生成项 [A-> .BC, a]
         '''
+        self.production = production
         self.header = production.header
         self.body = production.body
         self.symbols = symbols
@@ -28,8 +29,6 @@ class Item:
         else:
             return self.body[self.__loc]
 
-
-
     def beta_a(self):
         '''
         对于A -> [a.Bp, a](a 为alpha， p为beta)
@@ -42,7 +41,7 @@ class Item:
         else:
             return self.body[self.__loc + 1:], self.symbols
 
-    def next_item(self, symbols):
+    def next_item(self):
         '''
         获得下一个项
         即移入符号symbol [A -> .BC, a] 变为 [A ->B.C, a]
@@ -55,8 +54,16 @@ class Item:
 
         new_item = copy.deepcopy(self)
         new_item.__loc += 1
-        new_item.symbols = symbols
+        new_item.symbols = self.symbols
         return new_item
+
+    def get_production(self):
+        '''
+        获得该项所对应的产生式
+        :return: 产生式对象
+        '''
+        return self.production
+
 
     def __str__(self):
         item_str = ''
@@ -69,9 +76,19 @@ class Item:
             i += 1
         if self.__loc == len(self.body):
             item_str += '.'
+        item_str += ','
+        for s in self.symbols:
+            item_str += str(s) + " "
         item_str += ']'
         return item_str
-
+    def __eq__(self, other):
+        if not isinstance(other, Item):
+            return False
+        if other.symbols == self.symbols and\
+                other.header == self.header and\
+                other.body == self.body and\
+                other.__loc == self.__loc:
+            return True
 
 
 

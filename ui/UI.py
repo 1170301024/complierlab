@@ -2,7 +2,7 @@ import tkinter
 from tkinter import *
 from tkinter import filedialog, ttk ,messagebox
 
-from lexer.lexanalysis import LexAnalysis
+from lexer.lexer import Lexer
 
 root = Tk()
 root.title('编译原理实验')
@@ -446,6 +446,6 @@ class UI:
 
 
 if __name__ == '__main__':
-    lexer = LexAnalysis()
+    lexer = Lexer()
     ui = UI(lexer)
     ui.root()

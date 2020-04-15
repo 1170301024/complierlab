@@ -1,4 +1,6 @@
 from lexer.Tag import Tag
+from token import Token
+
 
 class Cfg:
     '''
@@ -20,6 +22,16 @@ class Cfg:
         self.S = Nonterminal('G')
         self.grammer()
 
+    # def grammer(self):
+    #     def reserve(header, body):
+    #         self.R.append(Production(header, body))
+    #
+    #     reserve(Nonterminal('G'), [Nonterminal('S')])
+    #     reserve(Nonterminal('S'), [Nonterminal('C'), Nonterminal('C')])
+    #     reserve(Nonterminal('C'), [Terminal(0, 'c'), Nonterminal('C')])
+    #     reserve(Nonterminal('C'), [Terminal(1, 'd')])
+
+
     def grammer(self):
         '''
          初始化增广文法， 填充cfg列表
@@ -37,7 +49,7 @@ class Cfg:
         # P -> S S
         # S -> e
         reserve(Nonterminal('P'), [Nonterminal('S'), Nonterminal('S')])
-        reserve(Nonterminal('S'), [])
+        reserve(Nonterminal('S'), [Empty()])
 
         # 语句
         # S ->  DS | IS | WS | DES | DOS | AS | FCS | FRS | FDS | FS
@@ -52,7 +64,7 @@ class Cfg:
         # DES -> T ID ; DES
         # DES -> e
         reserve(Nonterminal('DES'), [Nonterminal('T'), Terminal(Tag.ID, 'ID'),Terminal(Tag.SEMI, ';'), Nonterminal('DES')])
-        reserve(Nonterminal('DES'), [])
+        reserve(Nonterminal('DES'), [Empty()])
 
         # 控制流语句
         # if-else语句
@@ -85,7 +97,7 @@ class Cfg:
         # FCS -> ID ( A );
         # A -> e | E , A
         reserve(Nonterminal('FCS'), [Terminal(Tag.ID, 'ID'), Terminal(Tag.SLP, '('), Nonterminal('A'), Terminal(Tag.SLP, ')')])
-        reserve(Nonterminal('A'), [])
+        reserve(Nonterminal('A'), [Empty()])
         reserve(Nonterminal('A'), [Nonterminal('E'), Terminal(Tag.COM, ','), Nonterminal('A')])
         # 函数返回语句
         # FRS -> RETURN E ;
@@ -95,7 +107,7 @@ class Cfg:
         # FA -> e | T ID , FA | T, FA
         reserve(Nonterminal('FDS'), [Nonterminal('T'), Terminal(Tag.ID, 'ID'), Terminal(Tag.SLP, '('), Nonterminal('FA'),
                                      Terminal(Tag.SRP, ')'), Terminal(Tag.SEMI, ';')])
-        reserve(Nonterminal('FA'), [])
+        reserve(Nonterminal('FA'), [Empty()])
         reserve(Nonterminal('FA'), [Nonterminal('T'), Terminal(Tag.ID, 'ID'), Terminal(Tag.COM, ','), Nonterminal('FA')])
         reserve(Nonterminal('FA'), [Nonterminal('T'), Terminal(Tag.COM, ','), Nonterminal('FA')])
 
@@ -104,7 +116,7 @@ class Cfg:
         # FAD -> e | T ID, FAD
         reserve(Nonterminal('FS'), [Nonterminal('T'), Terminal(Tag.ID, 'ID'), Terminal(Tag.SLP, '('), Nonterminal('FAD')
             , Terminal(Tag.SLP, ')'), Terminal(Tag.LP, '{'),   Nonterminal('S'), Terminal(Tag.RP, '}')])
-        reserve(Nonterminal('FAD'), [])
+        reserve(Nonterminal('FAD'), [Empty])
         reserve(Nonterminal('FAD'), [Nonterminal('T'), Terminal(Tag.ID, 'ID'), Terminal(Tag.COM, ','), Nonterminal('FAD')])
         # 表达式
         # E -> EB | EO
@@ -155,9 +167,9 @@ class Cfg:
             [Nonterminal('R')]]:
             reserve(Nonterminal('B'), type)
         reserve(Nonterminal('R'), [Terminal(Tag.STRUCT, 'STRUCT'), Terminal(Tag.ID, 'ID')])
-        reserve(Nonterminal('PT'), [])
+        reserve(Nonterminal('PT'), [Empty()])
         reserve(Nonterminal('PT'), [Terminal(Tag.MUILT, 'MUILT'), Nonterminal('PT')])
-        reserve(Nonterminal('C'), [])
+        reserve(Nonterminal('C'), [Empty()])
         reserve(Nonterminal('C'), [Terminal(Tag.LRP, '['), Nonterminal('num'), Terminal(Tag.RRP, ']'), Nonterminal('C')])
 
         # 整数常量
@@ -212,10 +224,26 @@ class Terminal:
         self.character = character
         self.show_str = show_str
 
+    @staticmethod
+    def init_token(token):
+        if not isinstance(token, Token):
+            raise TypeError
+        character = token.code
+        if character in Tag.show_value:
+            show_str = token.attr
+        else:
+            show_str = Tag.show_strs[str(character)]
+        return Terminal(character, show_str)
+
     def __str__(self):
         return self.show_str
 
+    def __hash__(self):
+        return self.character
+
     def __eq__(self, other):
+        if not isinstance(other, Terminal):
+            return False
         return self.character == other.character
 
 
@@ -234,6 +262,24 @@ class Nonterminal:
     def __eq__(self, other):
         return self.character == other.character
 
+    def __hash__(self):
+        return hash(self.character)
+
+class Empty:
+    def __init__(self):
+        self.character = chr(949)
+
+    def __eq__(self, other):
+        if not isinstance(other, Empty):
+            return False
+        return self.character == other.character
+
+    def __hash__(self):
+        return 949
+
+    def __str__(self):
+        return self.character
+
 
 class Production:
     '''
@@ -244,6 +290,11 @@ class Production:
         self.header = header
         self.body = body
 
+    def get_num_body_smybol(self):
+        return len(self.body)
+
+    def get_header(self):
+        return self.header
     def __str__(self):
         '''
         表示一个产生式的字符串
@@ -260,7 +311,11 @@ class Production:
         if isinstance(other, Production):
             return self.header == other.header and self.body == other.body
         return False
-
+    def __hash__(self):
+        hash_value = hash(self.header)
+        for c in self.body:
+            hash_value += hash(c)
+        return hash_value
 
 
 

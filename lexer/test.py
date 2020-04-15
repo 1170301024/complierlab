@@ -1,5 +1,5 @@
-from lexer.lexanalysis import LexAnalysis
-test = LexAnalysis()
+from lexer.lexer import Lexer
+test = Lexer()
 
 while(True):
     token = test.getnexttoken()

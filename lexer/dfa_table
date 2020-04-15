@@ -1,80 +1,80 @@
 # DFA transform table
 # stateq input statep token
 stotal 49
-KEYWORDS auto break case char const continue default double else enum extern float for goto int long register return short sighed sizeof struct switch typedef union unsigned void volatile while
+KEYWORDS auto break case char const continue default double else enum extern float for goto if int long register return short sighed sizeof struct switch typedef union unsigned void volatile while
 # id
-0 a-z 26 <id,?>
-0 A-Z 26 <id,?>
-0 _ 26 <id,?>
-26 a-z 26 <id,?>
-26 A-Z 26 <id,?>
-26 0-9 26 <id,?>
-26 _ 26 <id,?>
+0 a-z 26 <301,?>
+0 A-Z 26 <301,?>
+0 _ 26 <301,?>
+26 a-z 26 <301,?>
+26 A-Z 26 <301,?>
+26 0-9 26 <301,?>
+26 _ 26 <301,?>
 
 # algrithm op
-0 * 1 <mult_op>
-0 + 2 <add_op>
-0 - 3 <sub_op>
-0 / 4 <div_op>
-0 % 5 <mod_op>
+0 * 1 <304>
+0 + 2 <302>
+0 - 3 <303>
+0 / 4 <305>
+0 % 5 <306>
 
 # logical op and relational op
-0 > 6 <relop,GT>
-6 = 9 <relop,GE>
-0 < 7 <relop,LT>
-7 = 9 <relop,LE>
-0 = 8 <assin_op>
-8 = 9 <relop,EQ>
-0 ! 10 <not>
-10 = 9 <relop,NE>
+0 > 6 <310,GT>
+6 = 9 <310,GE>
+0 < 7 <310,LT>
+7 = 9 <310,LE>
+0 = 8 <328>
+8 = 9 <310,EQ>
+0 ! 10 <309>
+10 = 9 <310,NE>
 0 | 11
-11 | 13 <or>
+11 | 13 <308>
 0 & 12
-12 & 14 <and>
+12 & 14 <307>
 
 # bound
-0 ; 15 <semi>
-0 [ 16 <lrp>
-0 ] 17 <rrp>
-0 \. 18 <dot>
-0 } 19 <rp>
-0 { 20 <lp>
-0 ( 21 <slp>
-0 ) 22 <srp>
-0 , 23 <com>
-0 : 24 <col>
-0 ? 25 <qm>
+0 ; 15 <317>
+0 [ 16 <318>
+0 ] 17 <319>
+0 \. 18 <320>
+0 } 19 <321>
+0 { 20 <322>
+0 ( 21 <323>
+0 ) 22 <324>
+0 , 23 <325>
+0 : 24 <326>
+0 ? 25 <327>
 
 # const
-0 1-9 27 <decimal,?>
+0 1-9 27 <311,?>
 27 0-9 27
-27 \. 28  <fconst,?>
+27 \. 28  <314,?>
 27 E 30
-28 0-9 29 <fconst,?>
+28 0-9 29 <314,?>
 29 0-9 29
 29 E 30
 30 +- 31
-30 0-9 32 <fconst,?>
+30 0-9 32 <314,?>
 31 0-9 32
 32 0-9 32
 
 0 " 33
 33 . 33
-33 " 34 <string,?>
+33 " 34 <316,?>
 
 0 ' 35
 35 . 36
-36 ' 37 <cconst,?>
+36 ' 37 <315,?>
 35 ' 37
 
-0 0 38 <demical,?>
-38 0-9 39 <octal,?>
+0 0 38 <311,?>
+38 0-9 39 <313,?>
 39 0-9 39
 38 x 40
-40 0-9 41 <hex,?>
+40 0-9 41 <312,?>
 41 0-9 41
 38 \. 47
-47 0-9 48 <fconst,?>
+47 0-9 48 <314,?>
 48 0-9 48
 
 # comment
@@ -84,8 +84,8 @@ KEYWORDS auto break case char const continue default double else enum extern flo
 43 * 44
 44 . 43
 44 * 44
-44 / 45 <comment,?>
+44 / 45 <332,?>
 
 # delimiter
-0 $blank 46 <delimiter>
-46 $blank 46 <delimiter>
+0 $blank 46 <333>
+46 $blank 46 <333>
