@@ -69,6 +69,6 @@ if __name__ == '__main__':
 
     # test_cfg()
     # test_item()
-    test_parser_items()
+    # test_parser_items()
     #test()
-    #test_parser_program()
+    test_parser_program()

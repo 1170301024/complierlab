@@ -297,10 +297,77 @@ class UI:
             window.mainloop()
 
         def syntaxRule():
-            pass
+            '''
+            用于前端打印LR分析表
+            :return:
+            '''
+            window = Tk()
+            window.title('LR分析表')
+            window.geometry('1200x600')
+            window.resizable(0, 0)
+            lb = Label(window, text='LR分析表', font=('黑体', 16, 'bold'))
+            lb.place(relx=0.5, rely=0.0)
+            lb1 = Label(window, text='ACTION', font=('黑体', 16, 'bold'))
+            lb1.place(relx=0.25, rely=0.1)
+            lb2 = Label(window, text='GOTO', font=('黑体', 16, 'bold'))
+            lb2.place(relx=0.75, rely=0.1)
+
+            frame = Frame(window)
+            # frame.place(x=630, y=90)
+            frame.pack(anchor=W, ipadx=10, side=LEFT, expand=True, fill=X)
+            frame1 = Frame(window)
+            frame1.pack(anchor=E, ipadx=10, side=LEFT, expand=True, fill=X)
+            # tianchong
+            content = Text(frame, width=0, height=30)
+            content.pack(anchor=W, side=LEFT, expand=False)
+            content.configure(background=window.cget('background'), highlightbackground=window.cget('background'))
+            content1 = Text(frame1, width=0, height=30)
+            content1.pack(anchor=E, side=LEFT, expand=False)
+            content1.configure(background=window.cget('background'), highlightbackground=window.cget('background'))
+            # 词法单元
+            type = ['input', 'token', 'line']
+            treeview = ttk.Treeview(frame, height=19, columns=type, show='headings')
+            treeview.pack(anchor=W, ipadx=100, side=LEFT, expand=True, fill=BOTH)
+            for head in type:
+                treeview.column(head, width=200, anchor='center')
+                treeview.heading(head, text=head)
+            # ----vertical scrollbar------------
+            vbar = ttk.Scrollbar(treeview, orient=VERTICAL, command=treeview.yview)
+            treeview.configure(yscrollcommand=vbar.set)
+            vbar.pack(side=RIGHT, fill=Y)
+            # ----horizontal scrollbar----------
+            hbar = ttk.Scrollbar(treeview, orient=HORIZONTAL, command=treeview.xview)
+            treeview.configure(xscrollcommand=hbar.set)
+            hbar.pack(side=BOTTOM, fill=X)
+            # DFA
+
+            menu = ['word', 'process']
+            treeview1 = ttk.Treeview(frame1, height=19, columns=menu, show='headings')
+            treeview1.pack(anchor=W, ipadx=100, side=LEFT, expand=True, fill=BOTH)
+            treeview1.column(menu[0], width=100, anchor='center', stretch=False)
+            treeview1.heading(menu[0], text=menu[0])
+            treeview1.column(menu[1], width=1000, anchor='w', stretch=False)
+            treeview1.heading(menu[1], text=menu[1], anchor='w')
+            # ----vertical scrollbar------------
+            vbar1 = ttk.Scrollbar(treeview1, orient=VERTICAL, command=treeview1.yview)
+            treeview1.configure(yscrollcommand=vbar1.set)
+            vbar1.pack(side=RIGHT, fill=Y)
+            # ----horizontal scrollbar----------
+            hbar1 = ttk.Scrollbar(treeview1, orient=HORIZONTAL, command=treeview1.xview)
+            treeview1.configure(xscrollcommand=hbar1.set)
+            hbar1.pack(side=BOTTOM, fill=X)
+            window.rowconfigure(0, weight=1)
+            window.columnconfigure(0, weight=1)
+
+            content2 = Text(frame1, width=0, height=30)
+            content2.pack(anchor=W, side=LEFT, expand=False)
+            content2.configure(background=window.cget('background'), highlightbackground=window.cget('background'))
 
         def syntaxAnalysis():
-            pass
+            '''
+            用于输出文法分析结果
+            :return:
+            '''
 
         def semanticsRule():
             pass
@@ -396,9 +463,9 @@ class UI:
 
             # 功能菜单
             # menuList = ['词法规则','词法分析','语法规则','语法分析','语义规则','语义分析']
-            action_list = ['DFA转换表','词法分析', '语法分析', '语义分析']
+            action_list = ['DFA转换表','词法分析','LR分析表', '语法分析', '语义分析']
             # eventList = [lexicalRule,lexicalAnalysis,syntaxRule,syntaxAnalysis,semanticsRule,semanticsAnalysis]
-            action_event_list = [lexicalRule,lexicalAnalysis, syntaxAnalysis, semanticsAnalysis]
+            action_event_list = [lexicalRule,lexicalAnalysis, syntaxRule, syntaxAnalysis, semanticsAnalysis]
             action_menu = Menu(menubar)
             for menu, event in zip(action_list, action_event_list):
                 action_menu.add_command(label=menu, command=event)

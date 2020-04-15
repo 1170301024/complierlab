@@ -1,5 +1,5 @@
 from lexer.lexer import Lexer
-from myparser.cfg import Cfg, Nonterminal, Terminal
+from myparser.cfg import Cfg, Nonterminal, Terminal, Empty
 from myparser.item import Item
 from lexer.Tag import Tag
 
@@ -31,9 +31,15 @@ class Parser:
 
         def containNull(list):
             for i in list:
-                if not isinstance(i, Terminal) and i == []:
+                if isinstance(i, Empty):
                     return True
             return False
+
+        def addFirst(source,target):
+            for i in source:
+                if i not in target and not isinstance(i , Empty):
+                    target.append(i)
+            return target
 
         def reduction(symbol):
             '''
@@ -43,6 +49,9 @@ class Parser:
             '''
             # 判断是否查询过
             if len(symbols) > 0 and symbol in symbols:
+                # print('当前符号：'+symbol.__str__()+' first: ')
+                # for i in firsts[symbols.index(symbol)]:
+                #     print(i.__str__())
                 return firsts[symbols.index(symbol)]
 
             results = []
@@ -55,17 +64,19 @@ class Parser:
                 if isinstance(temp, Terminal):
                     if temp not in results:
                         results.append(temp)
-                        break
+                        # break
                 # 若为非终结符，则跳过
                 elif isinstance(temp, Nonterminal):
                     continue
                 # 若为空产生式，则加入
-                elif [] not in results and temp == []:
-                    results.append([])
-                    break
+                elif isinstance(temp,Empty):
+                    if not containNull(results):
+                        results.append(Empty())
 
             for production in self.cfg.get_rules(symbol):
                 curBody = production.body
+                if len(curBody) == 1 and not isinstance(curBody[0],Nonterminal) :
+                    continue
                 if symbol in curBody:  # 若产生式左部出现在产生式右部，延后处理
                     record.append(production)
                     continue
@@ -74,25 +85,20 @@ class Parser:
                     if isinstance(temp, Nonterminal):
                         listOfTer = reduction(temp)
                         if containNull(listOfTer):  # 含有空产生式，跳过找下一个的first集, 若为最后一个则加入空
+                            results = addFirst(listOfTer, results)
                             if temp is not production.body[-1]:
                                 continue
-                            if not containNull(results):
-                                results.append([])
+                            if not containNull(results): # 全空
+                                results.append(Empty())
                                 break
                         else:  # 不含有空产生式，当前符号first加入到symbolfirst集中
-                            for i in listOfTer:
-                                if i not in results:
-                                    results.append(i)
-                                    break
+                            results = addFirst(listOfTer, results)
+                            break
                     # 若为终结符，终结符加入
                     elif isinstance(temp, Terminal):
                         if temp not in results:
                             results.append(temp)
                             break
-                    # 若为空产生式，则加入
-                    elif [] not in results and temp == []:
-                        results.append([])
-                        break
 
             if len(record) != 0:
                 for production in record:
@@ -104,16 +110,15 @@ class Parser:
                             else:
                                 listOfTer = reduction(temp)
                             if containNull(listOfTer):  # 含有空产生式，跳过找下一个的first集, 若为最后一个则加入空
+                                results = addFirst(listOfTer, results)
                                 if temp is not production.body[-1]:
                                     continue
                                 if not containNull(results):
-                                    results.append([])
+                                    results.append(Empty())
                                     break
                             else:
-                                for i in listOfTer:
-                                    if i not in results:
-                                        results.append(i)
-                                        break
+                                results = addFirst(listOfTer,results)
+                                break
                         # 若为终结符，终结符加入
                         elif isinstance(temp, Terminal) and temp not in results:
                             results.append(temp)
@@ -135,7 +140,10 @@ class Parser:
             result = []
             if beta is None:
                 return alpha
-            for symbol in beta:
+            list = []
+            list.extend(beta)
+            list.extend(alpha)
+            for symbol in list:
                 # 查询
                 currentFirst = []  # 当前符号first集
                 if isinstance(symbol, Terminal):  # 终结符
@@ -145,11 +153,13 @@ class Parser:
 
                 currentFirst.extend(reduction(symbol))  # 非终结符
                 if containNull(currentFirst):
+                    # print('当前符号：' + symbol.__str__() + ' first: ')
+                    # for i in currentFirst:
+                    #     print(i.__str__())
+                    result = addFirst(currentFirst,result)
                     continue
                 else:
-                    for i in currentFirst:
-                        if i not in result:
-                            result.append(i)
+                    result = addFirst(currentFirst,result)
                     return result
             return alpha
 
@@ -273,10 +283,10 @@ class Parser:
         while look.character != Tag.FINISH:
             state_actions =  self.actions[state_stack[-1]]
             error_flag1 = True
-            print(look.character)
+            print(look)
             print(state_stack)
             for action in state_actions:
-                print(action[0].character)
+                # print(action[0].character)
                 if action[0] == look:
                     error_flag1 = False
                     # 移入操作

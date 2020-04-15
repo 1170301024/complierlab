@@ -260,6 +260,8 @@ class Nonterminal:
         return self.character
 
     def __eq__(self, other):
+        if not isinstance(other, Nonterminal):
+            return False
         return self.character == other.character
 
     def __hash__(self):
