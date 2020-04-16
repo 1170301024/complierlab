@@ -42,7 +42,7 @@ class Item:
         :return: 因为a可能不止一个，所以是一个二元组(p, a), 其中a是一个列表
         '''
         if self.__loc >= len(self.body) - 1:
-            return None, self.symbols
+            return [Empty(),], self.symbols
         else:
             return self.body[self.__loc + 1:], self.symbols
 
@@ -61,7 +61,7 @@ class Item:
 
         new_item = copy.deepcopy(self)
         new_item.__loc += 1
-        new_item.symbols = self.symbols
+        new_item.symbols = self.symbols[:]
         return new_item
 
     def get_production(self):
@@ -70,6 +70,14 @@ class Item:
         :return: 产生式对象
         '''
         return self.production
+
+
+    def union_symbol(self, other):
+        if not isinstance(other, Item):
+            return False
+        if self.production == other.production and self.__loc == other.__loc:
+            return True
+
 
 
     def __str__(self):
@@ -92,6 +100,7 @@ class Item:
             item_str += str(s) + " "
         item_str += ']'
         return item_str
+
     def __eq__(self, other):
         if not isinstance(other, Item):
             return False
@@ -100,6 +109,8 @@ class Item:
                 other.body == self.body and\
                 other.__loc == self.__loc:
             return True
+    def __hash__(self):
+        return hash(self.production) + self.__loc
 
 
 

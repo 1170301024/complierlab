@@ -55,7 +55,7 @@ class Cfg:
         # S ->  DS | IS | WS | DES | DOS | AS | FCS | FRS | FDS | FS
         #     |{ S } | ;
         temp = [[Nonterminal('DS')], [Nonterminal('IS')], [Nonterminal('WS')], [Nonterminal('DES')], [Nonterminal('DOS')],
-                [Nonterminal('AS')], [Nonterminal('FCS')], [Nonterminal('FDS')], [Nonterminal('FS')], [Terminal(Tag.SEMI, ';')],
+                [Nonterminal('AS')], [Nonterminal('FCS')], [Nonterminal('FDS')], [Nonterminal('FRS')], [Nonterminal('FS')], [Terminal(Tag.SEMI, ';')],
                 [Terminal(Tag.LP, '{'), Nonterminal('S'), Terminal(Tag.RP, '}')]]
         for stmt in temp:
             reserve(Nonterminal('S'), stmt)
@@ -63,8 +63,7 @@ class Cfg:
         # 声明语句
         # DES -> T ID ; DES
         # DES -> e
-        reserve(Nonterminal('DES'), [Nonterminal('T'), Terminal(Tag.ID, 'ID'),Terminal(Tag.SEMI, ';'), Nonterminal('DES')])
-        reserve(Nonterminal('DES'), [Empty()])
+        reserve(Nonterminal('DES'), [Nonterminal('T'), Terminal(Tag.ID, 'ID'),Terminal(Tag.SEMI, ';')])
 
         # 控制流语句
         # if-else语句
@@ -88,8 +87,8 @@ class Cfg:
         #    | L = E ;
         # L -> ID [ E ]
         #    | L1 [ E ]
-        reserve(Nonterminal('AS'), [Terminal(Tag.ID, 'ID'), Terminal(Tag.ASSIGN, '='), Nonterminal('E')])
-        reserve(Nonterminal('AS'), [Nonterminal('L'), Terminal(Tag.ASSIGN, '='), Nonterminal('E')])
+        reserve(Nonterminal('AS'), [Terminal(Tag.ID, 'ID'), Terminal(Tag.ASSIGN, '='), Nonterminal('E'),Terminal(Tag.SEMI, ';')])
+        reserve(Nonterminal('AS'), [Nonterminal('L'), Terminal(Tag.ASSIGN, '='), Nonterminal('E'), Terminal(Tag.SEMI, ';')])
         reserve(Nonterminal('L'), [Terminal(Tag.ID, 'ID'), Terminal(Tag.LRP, '['), Nonterminal('E'), Terminal(Tag.RRP, ']')])
         reserve(Nonterminal('L'), [Nonterminal('L'), Terminal(Tag.LRP, '['), Nonterminal('E'), Terminal(Tag.RRP, ']')])
 
@@ -131,6 +130,7 @@ class Cfg:
         reserve(Nonterminal('E'), [Nonterminal('TO')])
         reserve(Nonterminal('TO'), [Nonterminal('TO'), Terminal(Tag.MUILT, '*'), Nonterminal('FO')])
         reserve(Nonterminal('TO'), [Nonterminal('TO'), Terminal(Tag.DIV, '/'), Nonterminal('FO')])
+        reserve(Nonterminal('TO'), [Nonterminal('FO')])
         reserve(Nonterminal('FO'), [Terminal(Tag.SLP, '('), Nonterminal('E'), Terminal(Tag.SRP, ')')])
         reserve(Nonterminal('FO'), [Terminal(Tag.ID, 'ID')])
         for const in [[Terminal(Tag.FCONST, 'FCONST')], [Terminal(Tag.HEX, 'HEX')], [Terminal(Tag.OCTAL, 'OCTAL')],
@@ -181,6 +181,7 @@ class Cfg:
         reserve(Nonterminal('num'), [Nonterminal('CT')])
         reserve(Nonterminal('CT'), [Nonterminal('CT'), Terminal(Tag.MUILT, '*'), Nonterminal('CF')])
         reserve(Nonterminal('CT'), [Nonterminal('CT'), Terminal(Tag.DIV, '/'), Nonterminal('CF')])
+        reserve(Nonterminal('CT'), [Nonterminal('CF')])
         reserve(Nonterminal('CF'), [Terminal(Tag.SLP, '('), Nonterminal('num'), Terminal(Tag.SRP, ')')])
         for const in [[Terminal(Tag.FCONST, 'FCONST')], [Terminal(Tag.HEX, 'HEX')], [Terminal(Tag.OCTAL, 'OCTAL')],
                       [Terminal(Tag.DECIMAL, 'DECIMAL')], [Terminal(Tag.CCONST, 'CCONST')]]:

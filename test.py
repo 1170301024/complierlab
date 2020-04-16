@@ -60,15 +60,28 @@ if __name__ == '__main__':
                 print(str(j[0]), str(j[1]), str(j[2]))
     def test_parser_program():
         lexer = Lexer()
-        lexer.program="int m;z=0x12;m = 2+3*4;char c= 'a';double b = 1;int[2][4] h;int[3] a;a[0] = 2;while(m>2)doif(m<8)m = m +1;else m = m*2;"
+        lexer.program="int m;z=0x12;m = 2+3*4;c= 'a';double b;int[2][4] h;int[3] a;a[0] = 2;while(m>2) if(m<8)m = m +1;else m = m*2;"
         lexer.initDFA("lexer/dfa_table")
+
         parser = Parser(lexer)
         parser.program()
+        nodes = [parser.node_stack[0]]
+
+
+        for node in nodes:
+            nodes.extend(node.get_subnodes())
+
+
+    def test_first():
+        lexer = Lexer()
+        parser = Parser(lexer)
+        parser.closure(None)
 
 
 
     # test_cfg()
     # test_item()
-    test_parser_items()
+    #test_parser_items()
     #test()
     test_parser_program()
+    # test_first()

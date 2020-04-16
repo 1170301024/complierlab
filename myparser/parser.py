@@ -1,7 +1,9 @@
 from lexer.lexer import Lexer
-from myparser.cfg import Cfg, Nonterminal, Terminal, Empty
+from myparser.cfg import Cfg, Nonterminal, Terminal, Empty, Production
 from myparser.item import Item
 from lexer.Tag import Tag
+from myparser.node import Node
+
 
 class Parser:
 
@@ -20,169 +22,116 @@ class Parser:
         # 其结构是一个字典 goto[i] = [(a, j), ()]
         self.gotos = {}
 
-    def closure(self, i) -> []:
+        # 树结构
+        self.node_stack = []
+
+    def closure(self, items) -> []:
         '''
         求项集i的闭包
         :param i:项集 列表
         :return: 项集i的闭包的一个列表 []
         '''
-        symbols = []  # 记录所有非终结符
-        firsts = []  # 记录所有非终结符的first集
+        first_dict = {}
+        derive_list = []
+        def derive_empty(a):
+            '''
+            输入一个非终结符，判断该非终结符是否能导出空
+            :param a: 符号
+            :return: 是否能够导入空
+            '''
+            if isinstance(a, Terminal) or isinstance(a, Empty):
+                return False
+            if not isinstance(a, Nonterminal):
+                raise TypeError
 
-        def containNull(list):
-            for i in list:
-                if isinstance(i, Empty):
+            derive_list.append(a)
+            rules = self.cfg.get_rules(a)
+            for rule in rules:
+                if Empty() in rule.body:
                     return True
-            return False
-
-        def addFirst(source,target):
-            for i in source:
-                if i not in target and not isinstance(i , Empty):
-                    target.append(i)
-            return target
-
-        def reduction(symbol):
-            '''
-            递归求非终结符的first集
-            :param symbol 非终结符号
-            :return symbol 的 first集[]
-            '''
-            # 判断是否查询过
-            if len(symbols) > 0 and symbol in symbols:
-                # print('当前符号：'+symbol.__str__()+' first: ')
-                # for i in firsts[symbols.index(symbol)]:
-                #     print(i.__str__())
-                return firsts[symbols.index(symbol)]
-
-            results = []
-            record = []  # 记录 产生式右部含有产生式左部的非终结符 的产生式集合
-            for production in self.cfg.get_rules(symbol):  # 终结符和空产生式先加入
-                if len(production.body) != 1:
+            for rule in rules:
+                body_list = rule.body
+                if body_list[0] in derive_list:
                     continue
-                    # 若为终结符，终结符加入
-                temp = production.body[0]
-                if isinstance(temp, Terminal):
-                    if temp not in results:
-                        results.append(temp)
-                        # break
-                # 若为非终结符，则跳过
-                elif isinstance(temp, Nonterminal):
-                    continue
-                # 若为空产生式，则加入
-                elif isinstance(temp,Empty):
-                    if not containNull(results):
-                        results.append(Empty())
-
-            for production in self.cfg.get_rules(symbol):
-                curBody = production.body
-                if len(curBody) == 1 and not isinstance(curBody[0],Nonterminal) :
-                    continue
-                if symbol in curBody:  # 若产生式左部出现在产生式右部，延后处理
-                    record.append(production)
-                    continue
-                for temp in curBody:  # 取出产生式右部，遍历：
-                    # 若为非终结符,判断空产生式
-                    if isinstance(temp, Nonterminal):
-                        listOfTer = reduction(temp)
-                        if containNull(listOfTer):  # 含有空产生式，跳过找下一个的first集, 若为最后一个则加入空
-                            results = addFirst(listOfTer, results)
-                            if temp is not production.body[-1]:
-                                continue
-                            if not containNull(results): # 全空
-                                results.append(Empty())
-                                break
-                        else:  # 不含有空产生式，当前符号first加入到symbolfirst集中
-                            results = addFirst(listOfTer, results)
-                            break
-                    # 若为终结符，终结符加入
-                    elif isinstance(temp, Terminal):
-                        if temp not in results:
-                            results.append(temp)
-                            break
-
-            if len(record) != 0:
-                for production in record:
-                    for temp in production.body:  # 取出产生式右部，遍历：
-                        # 若为非终结符,判断空产生式
-                        if isinstance(temp, Nonterminal):
-                            if symbol == temp:
-                                listOfTer = results
-                            else:
-                                listOfTer = reduction(temp)
-                            if containNull(listOfTer):  # 含有空产生式，跳过找下一个的first集, 若为最后一个则加入空
-                                results = addFirst(listOfTer, results)
-                                if temp is not production.body[-1]:
-                                    continue
-                                if not containNull(results):
-                                    results.append(Empty())
-                                    break
-                            else:
-                                results = addFirst(listOfTer,results)
-                                break
-                        # 若为终结符，终结符加入
-                        elif isinstance(temp, Terminal) and temp not in results:
-                            results.append(temp)
-                            break
-
-            symbols.append(symbol)
-            firsts.append(results)
-
-            return results
+                return derive_empty(body_list[0])
 
         def first(a):
             '''
-            获得从文法符号串a推到得到的串的首符号的集合(a 表示alpha)
-            :param a:文法符号串[]  nonter ter
-            :return: 终结符符号集合
+            获得从文法a推到得到的串的首符号的集合(a 表示alpha)
+            :param a:文法符号
+            :return: 终结符符号和空串集合
             '''
-            beta = a[0]
-            alpha = a[1]
-            result = []
-            if beta is None:
-                return alpha
-            list = []
-            list.extend(beta)
-            list.extend(alpha)
-            for symbol in list:
-                # 查询
-                currentFirst = []  # 当前符号first集
-                if isinstance(symbol, Terminal):  # 终结符
-                    if symbol not in result:
-                        result.append(symbol)
-                    return result
+            if isinstance(a, Terminal):
+                return [a,]
+            elif isinstance(a, Empty):
+                return [Empty()]
+            elif not isinstance(a, Nonterminal):
+                raise TypeError
 
-                currentFirst.extend(reduction(symbol))  # 非终结符
-                if containNull(currentFirst):
-                    # print('当前符号：' + symbol.__str__() + ' first: ')
-                    # for i in currentFirst:
-                    #     print(i.__str__())
-                    result = addFirst(currentFirst,result)
-                    continue
-                else:
-                    result = addFirst(currentFirst,result)
-                    return result
-            return alpha
+            result = set()
+            if a not in first_dict.keys():
+                first_dict[a] = []
+            rules = self.cfg.get_rules(a)
+            for rule in rules:
+                for s in rule.body:
+                    # 说明在求first集是产生了循环
+                    if s in first_dict.keys():
+                        first_s = first_dict[s]
+                        if derive_empty(s):
+                            first_s.append(Empty())
+                    else:
+                        first_s = first(s)
+                    result = result.union(first_s)
+                    if Empty() not in first_s:
+                        break
+            return set(result)
 
-        Items = []
-        Items.extend(i)
-        productions = []
-        lenth = 0
-        while 1:
-            if lenth == len(Items):  # 项目集不再变化
-                break
-            lenth = len(Items)
-            for item in Items:
-                # 判断下一个字符是否为终结符或者当前状态为规约状态
-                if item.next_symbol() is not None and isinstance(item.next_symbol(), Nonterminal):
-                    nonTerminalSymbol = item.next_symbol()
-                    symbolString = []
-                    symbolString.extend(item.beta_a())
-                    lookahead = first(symbolString)  # 展望符列表
-                    for production in self.cfg.get_rules(nonTerminalSymbol):  # 遍历增广文法产生式
-                        if production not in productions:
-                            productions.append(production)
-                            Items.append(Item(production, lookahead))
-        return Items
+        # def test_first():
+        #     s = Nonterminal('S')
+        #     result = first(s)
+        #     for c in result:
+        #         print(c)
+        # test_first()
+
+        scan_items = items[:]
+        for item in scan_items:
+            next_symbol = item.next_symbol()
+            if not isinstance(next_symbol, Nonterminal):
+                continue
+            beta_a = item.beta_a()
+            beta_a_s = []
+            beta_a_s.extend(beta_a[0])
+            # beta_a_s.extend(beta_a[1])
+            first_set = set()
+            p_is_empty = False
+            for s in beta_a_s:
+                if s == beta_a_s[-1]:
+                    p_is_empty = True
+                temp_first = first(s)
+                first_set = first_set.union(temp_first)
+                first_set.discard(Empty())
+                if Empty() not in temp_first:
+                    p_is_empty = False
+                    break
+            if p_is_empty:
+                first_set = first_set.union(beta_a[1])
+            productions = self.cfg.get_rules(next_symbol)
+            for p in productions:
+                new_item = Item(p, list(first_set))
+                if new_item not in scan_items:
+                    scan_items.append(new_item)
+                flag = True
+                for i in items:
+                    if i.union_symbol(new_item):
+                        flag = False
+                        # i.symbols.extend(new_item.symbols)
+                        for s in new_item.symbols:
+                            if s not in i.symbols:
+                                i.symbols.append(s)
+                        break
+                if flag:
+                    items.append(new_item)
+        return set(items)
 
     def goto(self, i, x) -> []:
         '''
@@ -212,6 +161,7 @@ class Parser:
         temp_family = [self.closure([start_items, ]),]
         self.item_family.extend(temp_family)
         # while len(temp_family) != 0:
+        #     print(len(self.item_family))
         #     temp_family_temp = []
         #     for I in temp_family:
         #         # 获得该项集中所有的下一个symbol
@@ -227,9 +177,9 @@ class Parser:
         #     temp_family = temp_family_temp[:]
         #     self.item_family.extend(temp_family)
 
+
         for I in self.item_family:
             index_I = self.item_family.index(I)
-
             # 获得该项集中所有的下一个symbol
             all_symbols = []
             for i in I:
@@ -255,6 +205,9 @@ class Parser:
                         self.actions[index_I] = {(s, 0, index_new_I),}
                 else:  # 如果为非终结符，那么加入到gotos中
                     if  index_I in self.gotos.keys():
+                        # 设置接收状态
+                        if s == self.cfg.get_rules(self.cfg.start_symbol())[0].body[0]:
+                            self.gotos[index_I].add((s, -1))
                         self.gotos[index_I].add((s, index_new_I))
                     else:
                         self.gotos[index_I] = {(s, index_new_I),}
@@ -270,45 +223,46 @@ class Parser:
             token = self.lexer.getnexttoken()
             look = Terminal.init_token(token[1])
 
-
-
         self.table(self.cfg)
-
         # 初始化时将0状态放入状态栈中
         state_stack = [0,]
+
 
         # look为将下一个token变成的终结符
         look = None
         move()
-        while look.character != Tag.FINISH:
+        while True:
+            print(state_stack)
             state_actions =  self.actions[state_stack[-1]]
             error_flag1 = True
-            print(state_stack)
-            print(look)
             for action in state_actions:
                 # print(action[0].character)
                 if action[0] == look:
                     error_flag1 = False
                     # 移入操作
                     if action[1] == 0:
-                        print('s')
                         state_stack.append(action[2])
+                        self.node_stack.append(Node(look))
                         move()
                         break
                     # 规约操作
                     else:
-                        print('r')
                         production = action[2]
                         num_of_s = production.get_num_body_smybol()
-                        print(production)
+                        r_node = Node(production.header)
                         for i in range(num_of_s):
                             state_stack.pop()
+                            r_node.add_subnode(self.node_stack.pop())
                         goto_action = self.gotos[state_stack[-1]]
                         error_flag = True
                         for action in goto_action:
                             if action[0] == production.header:
                                 error_flag = False
                                 state_stack.append(action[1])
+                                self.node_stack.append(r_node)
+                        # 接收状态返回
+                        if state_stack[1] == -1:
+                            return
                         if error_flag:
                             print("error...")
                             return

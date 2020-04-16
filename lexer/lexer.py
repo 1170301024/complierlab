@@ -20,7 +20,7 @@ class Lexer:
         if(self.forward == len(self.program)):
             self.forward = 0
             self.row = 1
-            return ['end',Token(Tag.FINISH)]
+            return ['end',Token(Tag.END)]
         self.lexmeBegin = self.forward
         curstate = 0
         #add
