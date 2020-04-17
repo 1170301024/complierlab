@@ -13,4 +13,3 @@ myidy1 = tree.insert(myidy, 0, "加州", text="美国加州", values=("5"))
 
 tree.pack()
 win.mainloop()
-CC

@@ -423,6 +423,7 @@ class UI:
 
 
             window.mainloop()
+
         def syntaxAnalysis():
             '''
             用于输出文法分析结果
@@ -431,8 +432,8 @@ class UI:
             if self.lexer.program == None:
                 tkinter.messagebox.showinfo('提示', '未读取分析文件')
                 return
-            if self.parser != None:
-                # self.lexer.program = "int m;z=0x12;m = 2+3*4;c= 'a';double b;int[2][4] h;int[3] a;a[0] = 2;while(m>2) if(m<8)m = m +1;else m = m*2;"
+            if self.parser == None:
+                # self.lexer.program = "int m;z=0x12;m = 2+3*4;c= 'a';double b;int[2][4] h;int[3] a;a[0] = 2;while(m>2) {if(m<8)m = m +1;else m = m*2;}"
                 self.lexer.initDFA("../lexer/dfa_table")
                 self.parser = Parser(self.lexer)
                 self.parser.program()
@@ -457,7 +458,7 @@ class UI:
                 subNodes = pNode.get_subnodes()
                 for subNode in subNodes:
                     screen_show = str(subNode.grammar_symbol)+' ('+str(subNode.lex_line)+')'
-                    items.append(processTree.insert(pNodeItem,0,text=screen_show,value=(screen_show),open=True))
+                    items.append(processTree.insert(pNodeItem,0,text=screen_show,open=True))
                 nodes.extend(subNodes)
 
             window.mainloop()
