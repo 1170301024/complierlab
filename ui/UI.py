@@ -365,6 +365,7 @@ class UI:
             treeview.configure(xscrollcommand=hbar.set)
             hbar.pack(side=BOTTOM, fill=X)
 
+            #制表
             count = 0
             for i in range(len(self.parser.item_family)):
                 temp = treeview.insert('', index=count)  # 新建行
@@ -375,6 +376,8 @@ class UI:
                         value = 's'+str(goto[2])
                     else:
                         value = str(goto[2])
+                    if goto[1] == -1:  # acc
+                        value = 'acc'
                     treeview.set(temp, column=index, value=(value))
                 count += 1
 
@@ -385,7 +388,6 @@ class UI:
                 column.add(str(production.header))
             column = list(column)
             column.insert(0, 'state')
-            print(column)
             treeview1 = ttk.Treeview(frame1, height=19, columns=column, show='headings')
             treeview1.pack(anchor=W, ipadx=100, side=LEFT, expand=True, fill=BOTH)
             for head in column:
@@ -406,17 +408,18 @@ class UI:
             content2.pack(anchor=W, side=LEFT, expand=False)
             content2.configure(background=window.cget('background'), highlightbackground=window.cget('background'))
 
+            #制表
             count = 0
             for i in range(len(self.parser.item_family)):
                 temp = treeview1.insert('', index=count)  # 新建行
                 treeview1.set(temp,column=column[0],value=str(i))
+                count += 1
                 if i not in gotos.keys():
                     continue
                 for goto in gotos[i]:  #
                     index = column.index(str(goto[0]))
                     value = str(goto[1])
                     treeview1.set(temp, column=index, value=(value))
-                count += 1
 
 
             window.mainloop()
