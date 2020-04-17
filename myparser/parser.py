@@ -23,7 +23,7 @@ class Parser:
         self.gotos = {}
 
         # 树结构
-        self.node_stack = []
+        self.root_node = None
 
     def closure(self, items) -> []:
         '''
@@ -208,7 +208,8 @@ class Parser:
                         # 设置接收状态
                         if s == self.cfg.get_rules(self.cfg.start_symbol())[0].body[0]:
                             self.gotos[index_I].add((s, -1))
-                        self.gotos[index_I].add((s, index_new_I))
+                        else:
+                            self.gotos[index_I].add((s, index_new_I))
                     else:
                         self.gotos[index_I] = {(s, index_new_I),}
 
@@ -226,7 +227,7 @@ class Parser:
         self.table(self.cfg)
         # 初始化时将0状态放入状态栈中
         state_stack = [0,]
-
+        node_stack = []
 
         # look为将下一个token变成的终结符
         look = None
@@ -242,7 +243,7 @@ class Parser:
                     # 移入操作
                     if action[1] == 0:
                         state_stack.append(action[2])
-                        self.node_stack.append(Node(look))
+                        node_stack.append(Node(look))
                         move()
                         break
                     # 规约操作
@@ -252,16 +253,19 @@ class Parser:
                         r_node = Node(production.header)
                         for i in range(num_of_s):
                             state_stack.pop()
-                            r_node.add_subnode(self.node_stack.pop())
+                            r_node.add_subnode(node_stack.pop())
                         goto_action = self.gotos[state_stack[-1]]
                         error_flag = True
                         for action in goto_action:
                             if action[0] == production.header:
                                 error_flag = False
                                 state_stack.append(action[1])
-                                self.node_stack.append(r_node)
+                                node_stack.append(r_node)
                         # 接收状态返回
                         if state_stack[1] == -1:
+                            print(state_stack)
+                            self.root_node = Node(self.cfg.start_symbol())
+                            self.root_node.add_subnode(node_stack[0])
                             return
                         if error_flag:
                             print("error...")

@@ -115,7 +115,7 @@ class Cfg:
         # FAD -> e | T ID, FAD
         reserve(Nonterminal('FS'), [Nonterminal('T'), Terminal(Tag.ID, 'ID'), Terminal(Tag.SLP, '('), Nonterminal('FAD')
             , Terminal(Tag.SLP, ')'), Terminal(Tag.LP, '{'),   Nonterminal('S'), Terminal(Tag.RP, '}')])
-        reserve(Nonterminal('FAD'), [Empty])
+        reserve(Nonterminal('FAD'), [Empty()])
         reserve(Nonterminal('FAD'), [Nonterminal('T'), Terminal(Tag.ID, 'ID'), Terminal(Tag.COM, ','), Nonterminal('FAD')])
         # 表达式
         # E -> EB | EO

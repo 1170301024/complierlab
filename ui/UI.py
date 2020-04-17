@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter import filedialog, ttk ,messagebox
 
 from lexer.lexer import Lexer
+from myparser.parser import Parser
 
 root = Tk()
 root.title('编译原理实验')
@@ -301,6 +302,11 @@ class UI:
             用于前端打印LR分析表
             :return:
             '''
+            parser = Parser(self.lexer)
+            gotos = parser.gotos
+            actions = parser.actions
+
+            # 初始化窗口
             window = Tk()
             window.title('LR分析表')
             window.geometry('1200x600')
@@ -312,20 +318,21 @@ class UI:
             lb2 = Label(window, text='GOTO', font=('黑体', 16, 'bold'))
             lb2.place(relx=0.75, rely=0.1)
 
+            # 框架用于存放ACTION表
             frame = Frame(window)
-            # frame.place(x=630, y=90)
             frame.pack(anchor=W, ipadx=10, side=LEFT, expand=True, fill=X)
+            # 框架用于存放GOTO表
             frame1 = Frame(window)
             frame1.pack(anchor=E, ipadx=10, side=LEFT, expand=True, fill=X)
-            # tianchong
+            # fill 以对齐->加滚轮
             content = Text(frame, width=0, height=30)
             content.pack(anchor=W, side=LEFT, expand=False)
             content.configure(background=window.cget('background'), highlightbackground=window.cget('background'))
             content1 = Text(frame1, width=0, height=30)
             content1.pack(anchor=E, side=LEFT, expand=False)
             content1.configure(background=window.cget('background'), highlightbackground=window.cget('background'))
-            # 词法单元
-            type = ['input', 'token', 'line']
+            # ACTION
+            type = ['input', 'token', 'line'] #column ACTION表需动态
             treeview = ttk.Treeview(frame, height=19, columns=type, show='headings')
             treeview.pack(anchor=W, ipadx=100, side=LEFT, expand=True, fill=BOTH)
             for head in type:
@@ -339,9 +346,9 @@ class UI:
             hbar = ttk.Scrollbar(treeview, orient=HORIZONTAL, command=treeview.xview)
             treeview.configure(xscrollcommand=hbar.set)
             hbar.pack(side=BOTTOM, fill=X)
-            # DFA
 
-            menu = ['word', 'process']
+            # GOTO
+            menu = ['word', 'process'] # column GOTO表需动态
             treeview1 = ttk.Treeview(frame1, height=19, columns=menu, show='headings')
             treeview1.pack(anchor=W, ipadx=100, side=LEFT, expand=True, fill=BOTH)
             treeview1.column(menu[0], width=100, anchor='center', stretch=False)
@@ -368,6 +375,37 @@ class UI:
             用于输出文法分析结果
             :return:
             '''
+            lexer = Lexer()
+            lexer.program = "int m;z=0x12;m = 2+3*4;c= 'a';double b;int[2][4] h;int[3] a;a[0] = 2;while(m>2) if(m<8)m = m +1;else m = m*2;"
+            lexer.initDFA("../lexer/dfa_table")
+
+            parser = Parser(lexer)
+            parser.program()
+            nodes = [parser.root_node]
+            items = []
+
+            # 初始化窗口
+            window = Tk()
+            window.title('语法分析')
+            window.geometry('1200x600')
+            window.resizable(0, 0)
+
+            # 树形屏幕显示
+            processTree = ttk.Treeview(window)
+            processTree.pack(fill=BOTH, expand=YES)
+
+            # insert(parent,index,iid=None,**kw)
+            items.append(processTree.insert('',0,text=str(nodes[0].grammar_symbol)+' ('+str(nodes[0].lex_line)+')',open=True))
+            for pNode in nodes:
+                pNodeItem = items[nodes.index(pNode)]
+                subNodes = pNode.get_subnodes()
+                for subNode in subNodes:
+                    screen_show = subNode.grammar_symbol.__str__()+' ('+str(subNode.lex_line)+')'
+                    items.append(processTree.insert(pNodeItem,0,text=screen_show,value=(screen_show),open=True))
+                nodes.extend(subNodes)
+
+            window.mainloop()
+
 
         def semanticsRule():
             pass
