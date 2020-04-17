@@ -1,4 +1,5 @@
-from lexer.lexer import Lexer
+from datetime import datetime
+
 from myparser.cfg import Cfg, Nonterminal, Terminal, Empty, Production
 from myparser.item import Item
 from lexer.Tag import Tag
@@ -23,7 +24,7 @@ class Parser:
         self.gotos = {}
 
         # 树结构
-        self.node_stack = []
+        self.root_node = None
 
     def closure(self, items) -> []:
         '''
@@ -56,6 +57,7 @@ class Parser:
                 return derive_empty(body_list[0])
 
         def first(a):
+
             '''
             获得从文法a推到得到的串的首符号的集合(a 表示alpha)
             :param a:文法符号
@@ -86,22 +88,16 @@ class Parser:
                         break
             return set(result)
 
-        # def test_first():
-        #     s = Nonterminal('S')
-        #     result = first(s)
-        #     for c in result:
-        #         print(c)
-        # test_first()
-
         scan_items = items[:]
+        set_scan_items = set(scan_items)
         for item in scan_items:
+            #print(len(scan_items))
             next_symbol = item.next_symbol()
             if not isinstance(next_symbol, Nonterminal):
                 continue
             beta_a = item.beta_a()
             beta_a_s = []
             beta_a_s.extend(beta_a[0])
-            # beta_a_s.extend(beta_a[1])
             first_set = set()
             p_is_empty = False
             for s in beta_a_s:
@@ -118,20 +114,21 @@ class Parser:
             productions = self.cfg.get_rules(next_symbol)
             for p in productions:
                 new_item = Item(p, list(first_set))
-                if new_item not in scan_items:
-                    scan_items.append(new_item)
+                if new_item in set_scan_items:
+                    continue
+                scan_items.append(new_item)
+                set_scan_items.add(new_item)
                 flag = True
                 for i in items:
                     if i.union_symbol(new_item):
                         flag = False
-                        # i.symbols.extend(new_item.symbols)
-                        for s in new_item.symbols:
+                        for s in first_set:
                             if s not in i.symbols:
                                 i.symbols.append(s)
                         break
                 if flag:
                     items.append(new_item)
-        return set(items)
+        return items
 
     def goto(self, i, x) -> []:
         '''
@@ -160,26 +157,10 @@ class Parser:
         self.item_family = []
         temp_family = [self.closure([start_items, ]),]
         self.item_family.extend(temp_family)
-        # while len(temp_family) != 0:
-        #     print(len(self.item_family))
-        #     temp_family_temp = []
-        #     for I in temp_family:
-        #         # 获得该项集中所有的下一个symbol
-        #         all_symbols = []
-        #         for i in I:
-        #             one_symbol = i.next_symbol()
-        #             if one_symbol is not None:
-        #                 all_symbols.append(one_symbol)
-        #         for s in all_symbols:
-        #             new_I = self.goto(I, s)
-        #             if new_I is not None and new_I not in self.item_family and new_I not in temp_family_temp:
-        #                 temp_family_temp.append(new_I)
-        #     temp_family = temp_family_temp[:]
-        #     self.item_family.extend(temp_family)
 
-
+        max_int = datetime.now() - datetime.now()
         for I in self.item_family:
-            print(len(self.item_family))
+            #print(datetime.now())
             index_I = self.item_family.index(I)
             # 获得该项集中所有的下一个symbol
             all_symbols = []
@@ -187,19 +168,37 @@ class Parser:
                 one_symbol = i.next_symbol()
                 # 如果存在某一项没有next symbol,那么以及进行规约，加入到action中
                 if one_symbol is None:
+                    # 设置接收状态
+
                     if index_I in self.actions.keys():
-                        self.actions[index_I] = self.actions[index_I].union({(look_symbol, 1, i.get_production()) for look_symbol in i.symbols})
+                        if i.production.header == self.cfg.start_symbol():
+                            self.actions[index_I] = self.actions[index_I].add((i.symbols[0], -1, i.symbols))
+                        else:
+                            self.actions[index_I] = self.actions[index_I].union({(look_symbol, 1, i.get_production()) for look_symbol in i.symbols})
                     else:
-                        self.actions[index_I] = {(look_symbol, 1, i.get_production()) for look_symbol in i.symbols}
+                        if i.production.header == self.cfg.start_symbol():
+                            self.actions[index_I] = {(i.symbols[0], -1, -1)}
+                        else:
+                            self.actions[index_I] = {(look_symbol, 1, i.get_production()) for look_symbol in i.symbols}
                 if one_symbol is not None:
                     all_symbols.append(one_symbol)
             for s in all_symbols:
+                t1 = datetime.now()
                 new_I = self.goto(I, s)
+                t2 = datetime.now()
+                #print(t2 -t1)
+                if t2 - t1 > max_int:
+                    max_int = t2-t1
+
                 if new_I is not None and new_I not in self.item_family:
                     self.item_family.append(new_I)
-                index_new_I = self.item_family.index(new_I)
+                    index_new_I = len(self.item_family)-1
+                else:
+                    index_new_I = self.item_family.index(new_I)
+
                 # 如果此时s是终结符，那么加入到actions中，并设为移入
                 if isinstance(s, Terminal):
+
                     if index_I in self.actions.keys():
                         self.actions[index_I].add((s, 0, index_new_I))
                     else:
@@ -209,10 +208,11 @@ class Parser:
                         # 设置接收状态
                         if s == self.cfg.get_rules(self.cfg.start_symbol())[0].body[0]:
                             self.gotos[index_I].add((s, -1))
-                        self.gotos[index_I].add((s, index_new_I))
+                        else:
+                            self.gotos[index_I].add((s, index_new_I))
                     else:
                         self.gotos[index_I] = {(s, index_new_I),}
-
+        print("求一个项集花费的最长时间为:" + str(max_int))
     def program(self):
         '''
         进行语法分析
@@ -223,12 +223,14 @@ class Parser:
             nonlocal look
             token = self.lexer.getnexttoken()
             look = Terminal.init_token(token[1])
-
+        t1 = datetime.now()
         self.table(self.cfg)
-        print("hello")
+        t2 = datetime.now()
+        print("求闭包花费的时间为：" + str(t2-t1))
+
         # 初始化时将0状态放入状态栈中
         state_stack = [0,]
-
+        node_stack = []
 
         # look为将下一个token变成的终结符
         look = None
@@ -241,10 +243,18 @@ class Parser:
                 # print(action[0].character)
                 if action[0] == look:
                     error_flag1 = False
+                    #接收状态
+                    if action[1] == -1:
+                        if len(state_stack) != 2:
+                            raise None
+                        self.root_node = Node(self.cfg.start_symbol())
+                        self.root_node.add_subnode(node_stack[0])
+                        return
+
                     # 移入操作
-                    if action[1] == 0:
+                    elif action[1] == 0:
                         state_stack.append(action[2])
-                        self.node_stack.append(Node(look))
+                        node_stack.append(Node(look))
                         move()
                         break
                     # 规约操作
@@ -254,19 +264,15 @@ class Parser:
                         r_node = Node(production.header)
                         for i in range(num_of_s):
                             state_stack.pop()
-                            r_node.add_subnode(self.node_stack.pop())
+                            r_node.add_subnode(node_stack.pop())
                         goto_action = self.gotos[state_stack[-1]]
                         error_flag = True
                         for action in goto_action:
                             if action[0] == production.header:
                                 error_flag = False
                                 state_stack.append(action[1])
-                                self.node_stack.append(r_node)
-                        # 接收状态返回
-                        if state_stack[1] == -1:
+                                node_stack.append(r_node)
 
-                            print(state_stack)
-                            return
                         if error_flag:
                             print("error...")
                             return

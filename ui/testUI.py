@@ -1,36 +1,16 @@
-from tkinter import *
-from tkinter import ttk
+import tkinter
+from tkinter import ttk  # 导入内部包
 
-myApp = Tk()
-myApp.title(" Program ")
-myApp.geometry("800x700")
+win = tkinter.Tk()
+tree = ttk.Treeview(win)
 
+# 参数:parent, index, iid=None, **kw (父节点，插入的位置，id，显示出的文本)
+myid = tree.insert("", 0, "中国", text="中国China", values=("1"))  # ""表示父节点是根
+myidx1 = tree.insert(myid, 0, "广东", text="中国广东", values=("2"))  # text表示显示出的文本，values是隐藏的值
+myidx2 = tree.insert(myid, 1, "江苏", text="中国江苏", values=("3"))
+myidy = tree.insert("", 1, "美国", text="美国USA", values=("4"))
+myidy1 = tree.insert(myidy, 0, "加州", text="美国加州", values=("5"))
 
-tree = ttk.Treeview(myApp,height=25)
-tree['show'] = 'headings'
-
-sb = ttk.Scrollbar(myApp, orient="vertical", command=tree.yview)
-sb.grid(row=1,column=1,sticky="NS",pady=5)
-
-tree.configure(yscrollcommand=sb.set)
-
-tree["columns"]=("1","2","3")
-
-tree.column("1", width=50)
-tree.column("2", width=50)
-tree.column("3", width=50)
-
-tree.heading("1", text="Col 1")
-tree.heading("2", text="Col 2")
-tree.heading("3", text="Col 3")
-
-item = tree.insert("", "end", values=("",))
-
-tree.grid(row=1,column=0,padx=5,pady=5)
-
-tree.insert("", "end", values=("a",),)
-tree.insert("", "end", values=("b",), tag='gray')
-tree.insert("", "end", values=("c",),)
-tree.insert("", "end", values=("d",), tag='gray')
-tree.tag_configure('gray', background='#cccccc')
-myApp.mainloop()
+tree.pack()
+win.mainloop()
+CC
