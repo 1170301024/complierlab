@@ -236,17 +236,16 @@ class Parser:
         look = None
         move()
         while True:
-            print(state_stack)
+            # print(state_stack)
             state_actions =  self.actions[state_stack[-1]]
             error_flag1 = True
             for action in state_actions:
-                # print(action[0].character)
                 if action[0] == look:
                     error_flag1 = False
                     #接收状态
                     if action[1] == -1:
                         if len(state_stack) != 2:
-                            raise None
+                            raise None # 规约完G之后还有问题
                         self.root_node = Node(self.cfg.start_symbol())
                         self.root_node.add_subnode(node_stack[0])
                         return
@@ -274,11 +273,11 @@ class Parser:
                                 node_stack.append(r_node)
 
                         if error_flag:
-                            print("error...")
+                            print("error...") # 不能GOTO
                             return
                         # 表明在该状态下该字符对应的动作为空
             if error_flag1:
-                print("error")
+                print("error") # 不能ACTION
                 return
 
 

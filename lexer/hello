@@ -1,39 +1,19 @@
-int m,z=0x12;
+int m;z=0x12;
 m = 2+3*4;
-char c= 'a';
-double b = 1;
 int[2][4] h;
 int[3] a;
 a[0] = 2;
 while(m>2)
-do
 if(m<8)
 m = m +1;
 else m = m*2;
-switch(m){
-  case 1:
-  m = m +1;
-  case 2:
-  m = m + 3;
-  default:
-  m = m +6;
-}
-int r = 0x12;
 int i;
-for(i = 0;i<10;i++){
-  m = m+2;
-}
-struct stack{
-  int num;
-  char value;
-}
-
-int getSum(int x,int y){
-   int j = x;
-   int k = y;i
+int getSum(int x,int y,){
+   int j;
+   int k;
    return j+k;
 }
-getSum(1,2);    /*end*/
+getSum(1,2,);    /*end*/
 
 
 

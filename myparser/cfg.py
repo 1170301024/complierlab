@@ -80,7 +80,7 @@ class Cfg:
         # do-while语句
         # DOS -> DO S WHILE ( E ) ;
         reserve(Nonterminal('DOS'), [Terminal(Tag.DO, 'DO'), Nonterminal('S'), Terminal(Tag.WHILE, 'WHILE'), Terminal(Tag.SLP, '('),
-                                     Nonterminal('E'), Terminal(Tag.SRP, ')')])
+                                     Nonterminal('E'), Terminal(Tag.SRP, ')'),Terminal(Tag.SEMI, ';')])
 
         # 赋值语句
         # AS -> ID = E ;
@@ -95,26 +95,26 @@ class Cfg:
         # 函数调用语句
         # FCS -> ID ( A );
         # A -> e | E , A
-        reserve(Nonterminal('FCS'), [Terminal(Tag.ID, 'ID'), Terminal(Tag.SLP, '('), Nonterminal('A'), Terminal(Tag.SLP, ')')])
+        reserve(Nonterminal('FCS'), [Terminal(Tag.ID, 'ID'), Terminal(Tag.SLP, '('), Nonterminal('A'), Terminal(Tag.SRP, ')')])
         reserve(Nonterminal('A'), [Empty()])
         reserve(Nonterminal('A'), [Nonterminal('E'), Terminal(Tag.COM, ','), Nonterminal('A')])
         # 函数返回语句
         # FRS -> RETURN E ;
-        reserve(Nonterminal('FRS'), [Terminal(Tag.RETURN, 'RETURN'), Nonterminal('E')])
+        reserve(Nonterminal('FRS'), [Terminal(Tag.RETURN, 'RETURN'), Nonterminal('E'),Terminal(Tag.SEMI, ';')])
         # 函数声明语句
         # FDS -> T ID ( FA );
         # FA -> e | T ID , FA | T, FA
-        reserve(Nonterminal('FDS'), [Nonterminal('T'), Terminal(Tag.ID, 'ID'), Terminal(Tag.SLP, '('), Nonterminal('FA'),
+        reserve(Nonterminal('FDS'), [Nonterminal('T'), Terminal(Tag.ID, 'ID'), Terminal(Tag.SLP, '('), Nonterminal('FAD'),
                                      Terminal(Tag.SRP, ')'), Terminal(Tag.SEMI, ';')])
-        reserve(Nonterminal('FA'), [Empty()])
-        reserve(Nonterminal('FA'), [Nonterminal('T'), Terminal(Tag.ID, 'ID'), Terminal(Tag.COM, ','), Nonterminal('FA')])
-        reserve(Nonterminal('FA'), [Nonterminal('T'), Terminal(Tag.COM, ','), Nonterminal('FA')])
+        # reserve(Nonterminal('FA'), [Empty()])
+        # reserve(Nonterminal('FA'), [Nonterminal('T'), Terminal(Tag.ID, 'ID'), Terminal(Tag.COM, ','), Nonterminal('FA')])
+        # reserve(Nonterminal('FA'), [Nonterminal('T'), Terminal(Tag.COM, ','), Nonterminal('FA')])
 
         # 函数定义语句
         # FS -> T ID ( FAD ) { S }
         # FAD -> e | T ID, FAD
         reserve(Nonterminal('FS'), [Nonterminal('T'), Terminal(Tag.ID, 'ID'), Terminal(Tag.SLP, '('), Nonterminal('FAD')
-            , Terminal(Tag.SLP, ')'), Terminal(Tag.LP, '{'),   Nonterminal('S'), Terminal(Tag.RP, '}')])
+            , Terminal(Tag.SRP, ')'), Terminal(Tag.LP, '{'),   Nonterminal('S'), Terminal(Tag.RP, '}')])
         reserve(Nonterminal('FAD'), [Empty()])
         reserve(Nonterminal('FAD'), [Nonterminal('T'), Terminal(Tag.ID, 'ID'), Terminal(Tag.COM, ','), Nonterminal('FAD')])
         # 表达式

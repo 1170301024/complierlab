@@ -55,7 +55,7 @@ class Lexer:
                     token = Token(code, value)
             else:
                 token = Token(self.states[prestate].code, self.states[prestate].attr)
-            if(token.code == Tag.DELIMITER):
+            if token.code in [Tag.DELIMITER,Tag.COMMENT]:
                 return self.getnexttoken()
             else:
                 return [currentInput,token,record]
