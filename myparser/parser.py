@@ -179,6 +179,7 @@ class Parser:
 
 
         for I in self.item_family:
+            print(len(self.item_family))
             index_I = self.item_family.index(I)
             # 获得该项集中所有的下一个symbol
             all_symbols = []
@@ -224,6 +225,7 @@ class Parser:
             look = Terminal.init_token(token[1])
 
         self.table(self.cfg)
+        print("hello")
         # 初始化时将0状态放入状态栈中
         state_stack = [0,]
 
@@ -262,6 +264,8 @@ class Parser:
                                 self.node_stack.append(r_node)
                         # 接收状态返回
                         if state_stack[1] == -1:
+
+                            print(state_stack)
                             return
                         if error_flag:
                             print("error...")
