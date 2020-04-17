@@ -2,6 +2,7 @@ import tkinter
 from tkinter import *
 from tkinter import filedialog, ttk ,messagebox
 
+from lexer.Tag import Tag
 from lexer.lexer import Lexer
 from myparser.parser import Parser
 
@@ -16,6 +17,7 @@ class UI:
     errorTreeview = None
 
     def __init__(self, lexer):
+        self.parser = None
         self.lexer = lexer
         self.contentList = None
         self.content = None
@@ -302,9 +304,15 @@ class UI:
             用于前端打印LR分析表
             :return:
             '''
-            parser = Parser(self.lexer)
-            gotos = parser.gotos
-            actions = parser.actions
+            if self.parser == None:
+                self.lexer.program = "int m;z=0x12;m = 2+3*4;c= 'a';double b;int[2][4] h;int[3] a;a[0] = 2;while(m>2) if(m<8)m = m +1;else m = m*2;"
+                self.lexer.initDFA("../lexer/dfa_table")
+
+                self.parser = Parser(self.lexer)
+                self.parser.program()
+            gotos = self.parser.gotos
+            actions = self.parser.actions
+
 
             # 初始化窗口
             window = Tk()
@@ -331,12 +339,22 @@ class UI:
             content1 = Text(frame1, width=0, height=30)
             content1.pack(anchor=E, side=LEFT, expand=False)
             content1.configure(background=window.cget('background'), highlightbackground=window.cget('background'))
-            # ACTION
-            type = ['input', 'token', 'line'] #column ACTION表需动态
-            treeview = ttk.Treeview(frame, height=19, columns=type, show='headings')
+
+            # ACTION: （终结符，转换，状态）
+            column = set()  # 集合，元素不重复
+            # 加终结符
+            keys = ['ID', 'DECIMAL', 'FCONST', 'HEX', 'OCTAL', 'CCONST', 'STRING', 'REL']
+            for key in Tag.show_strs.keys():
+                column.add(Tag.show_strs[key])
+            for key in keys:
+                column.add(key)
+            column = list(column)  # 终结符集合
+            column.sort()
+            column.insert(0, 'state')
+            treeview = ttk.Treeview(frame, height=19, columns=column, show='headings')
             treeview.pack(anchor=W, ipadx=100, side=LEFT, expand=True, fill=BOTH)
-            for head in type:
-                treeview.column(head, width=200, anchor='center')
+            for head in column:
+                treeview.column(head, width=100, anchor='center')
                 treeview.heading(head, text=head)
             # ----vertical scrollbar------------
             vbar = ttk.Scrollbar(treeview, orient=VERTICAL, command=treeview.yview)
@@ -347,14 +365,32 @@ class UI:
             treeview.configure(xscrollcommand=hbar.set)
             hbar.pack(side=BOTTOM, fill=X)
 
+            count = 0
+            for i in range(len(self.parser.item_family)):
+                temp = treeview.insert('', index=count)  # 新建行
+                treeview.set(temp, column=column[0], value=str(i))
+                for goto in actions[i]:  # dict_keys([]) 迭代形式
+                    index = column.index(str(goto[0]))
+                    if goto[1] == 0:
+                        value = 's'+str(goto[2])
+                    else:
+                        value = str(goto[2])
+                    treeview.set(temp, column=index, value=(value))
+                count += 1
+
             # GOTO
-            menu = ['word', 'process'] # column GOTO表需动态
-            treeview1 = ttk.Treeview(frame1, height=19, columns=menu, show='headings')
+            column = set()
+            column.add('DS')
+            for production in self.parser.cfg.R:
+                column.add(str(production.header))
+            column = list(column)
+            column.insert(0, 'state')
+            print(column)
+            treeview1 = ttk.Treeview(frame1, height=19, columns=column, show='headings')
             treeview1.pack(anchor=W, ipadx=100, side=LEFT, expand=True, fill=BOTH)
-            treeview1.column(menu[0], width=100, anchor='center', stretch=False)
-            treeview1.heading(menu[0], text=menu[0])
-            treeview1.column(menu[1], width=1000, anchor='w', stretch=False)
-            treeview1.heading(menu[1], text=menu[1], anchor='w')
+            for head in column:
+                treeview1.column(head, width=100, anchor='center')
+                treeview1.heading(head, text=head)
             # ----vertical scrollbar------------
             vbar1 = ttk.Scrollbar(treeview1, orient=VERTICAL, command=treeview1.yview)
             treeview1.configure(yscrollcommand=vbar1.set)
@@ -370,18 +406,34 @@ class UI:
             content2.pack(anchor=W, side=LEFT, expand=False)
             content2.configure(background=window.cget('background'), highlightbackground=window.cget('background'))
 
+            count = 0
+            for i in range(len(self.parser.item_family)):
+                temp = treeview1.insert('', index=count)  # 新建行
+                treeview1.set(temp,column=column[0],value=str(i))
+                if i not in gotos.keys():
+                    continue
+                for goto in gotos[i]:  #
+                    index = column.index(str(goto[0]))
+                    value = str(goto[1])
+                    treeview1.set(temp, column=index, value=(value))
+                count += 1
+
+
+            window.mainloop()
         def syntaxAnalysis():
             '''
             用于输出文法分析结果
             :return:
             '''
-            lexer = Lexer()
-            lexer.program = "int m;z=0x12;m = 2+3*4;c= 'a';double b;int[2][4] h;int[3] a;a[0] = 2;while(m>2) if(m<8)m = m +1;else m = m*2;"
-            lexer.initDFA("../lexer/dfa_table")
-
-            parser = Parser(lexer)
-            parser.program()
-            nodes = [parser.root_node]
+            if self.lexer.program == None:
+                tkinter.messagebox.showinfo('提示', '未读取分析文件')
+                return
+            if self.parser != None:
+                # self.lexer.program = "int m;z=0x12;m = 2+3*4;c= 'a';double b;int[2][4] h;int[3] a;a[0] = 2;while(m>2) if(m<8)m = m +1;else m = m*2;"
+                self.lexer.initDFA("../lexer/dfa_table")
+                self.parser = Parser(self.lexer)
+                self.parser.program()
+            nodes = [self.parser.root_node]
             items = []
 
             # 初始化窗口
