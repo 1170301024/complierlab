@@ -442,6 +442,7 @@ class UI:
             window.geometry('1200x600')
             window.resizable(0, 0)
 
+
             # 树形屏幕显示
             processTree = ttk.Treeview(window)
             processTree.pack(fill=BOTH, expand=YES)
@@ -452,7 +453,7 @@ class UI:
                 pNodeItem = items[nodes.index(pNode)]
                 subNodes = pNode.get_subnodes()
                 for subNode in subNodes:
-                    screen_show = subNode.grammar_symbol.__str__()+' ('+str(subNode.lex_line)+')'
+                    screen_show = str(subNode.grammar_symbol)+' ('+str(subNode.lex_line)+')'
                     items.append(processTree.insert(pNodeItem,0,text=screen_show,value=(screen_show),open=True))
                 nodes.extend(subNodes)
 

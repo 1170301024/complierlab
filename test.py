@@ -65,9 +65,7 @@ if __name__ == '__main__':
 
         parser = Parser(lexer)
         parser.program()
-        nodes = [parser.node_stack[0]]
-
-
+        nodes = [parser.root_node]
         for node in nodes:
             nodes.extend(node.get_subnodes())
 

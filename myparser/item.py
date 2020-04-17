@@ -110,7 +110,10 @@ class Item:
                 other.__loc == self.__loc:
             return True
     def __hash__(self):
-        return hash(self.production) + self.__loc
+        result = hash(self.production) + self.__loc
+        for s in self.symbols:
+            result += hash(s)
+        return result
 
 
 

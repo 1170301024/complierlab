@@ -201,8 +201,9 @@ class Cfg:
         :return: 产生式的集合
         '''
         if not isinstance(nontermial, Nonterminal) :
-            raise TypeError
+
             print("参数错误，需要传入一个Nonterminal类型的变量")
+            raise TypeError
         result = []
         for rule in self.R:
             if rule.header == nontermial:
