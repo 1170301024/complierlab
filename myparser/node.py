@@ -1,8 +1,8 @@
 
 # Node表示抽象语法树的内结点
 class Node:
-    def __init__(self, symbol):
-        self.lex_line = 0
+    def __init__(self, symbol, lex_line = 0):
+        self.lex_line = lex_line
         self.grammar_symbol = symbol
         self.sub_nodes = []
     def add_subnode(self, node):

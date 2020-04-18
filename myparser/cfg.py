@@ -245,7 +245,7 @@ class Cfg:
         # 类型标识符
         # type-specifier -> VOID | CHAR | SHORT | INT | LONG | FLOAT | DOUBLE | SIGNED | UNSIGNED
         # type-specifier -> struct-or-union-specifier
-        # struct-or-union-specifier -> struct-or-union IDopt { struct-declaration-list }
+        # struct-or-union-specifier -> struct-or-union  { struct-declaration-list }
         # struct-or-union-specifier -> struct-or-union ID
         # IDopt -> ID | e
         # struct-or-union -> STRUCT | UNION
@@ -256,7 +256,7 @@ class Cfg:
         reserve(Nonterminal('type-specifier'),
                 [Nonterminal('struct-or-union-specifier')])
         reserve(Nonterminal('struct-or-union-specifier'),
-                [Nonterminal('struct-or-union'),Nonterminal('IDopt'),Terminal(Tag.LP,'{'),
+                [Nonterminal('struct-or-union'),Terminal(Tag.LP,'{'),
                  Nonterminal('struct-declaration-list'),Terminal(Tag.RP,'}')])
         reserve(Nonterminal('struct-or-union-specifier'),
                 [Nonterminal('struct-or-union'),Terminal(Tag.ID,'ID')])
@@ -272,14 +272,14 @@ class Cfg:
 
         # # 所有的声明语句 int x; int y
         # struct-declaration-list -> struct-declaration
-        # struct-declaration-list -> struct-declaration-listopt struct-delaration
+        # struct-declaration-list -> struct-declaration-list struct-delaration
         # 
         # struct-declaration -> struct-declarator-listopt ;
         # struct-declarator-listopt -> struct-declarator-list | e
         reserve(Nonterminal('struct-declaration-list'),
                 [Nonterminal('struct-declaration')])
         reserve(Nonterminal('struct-declaration-list'),
-                [Nonterminal('struct-declaration-listopt'), Nonterminal('struct-declaration')])
+                [Nonterminal('struct-declaration-list'), Nonterminal('struct-declaration')])
         reserve(Nonterminal('struct-declaration'),
                 [Nonterminal('specifier-qualifier-list'),Nonterminal('struct-declarator-listopt'), Terminal(Tag.SEMI, ';')])
         reserve(Nonterminal('struct-declarator-listopt'),
@@ -288,19 +288,19 @@ class Cfg:
                 [Empty()])
         reserve(Nonterminal('specifier-qualifier-list'),[Nonterminal('type-specifier'),Nonterminal('specifier-qualifier-listopt')])
         reserve(Nonterminal('specifier-qualifier-listopt'),[Nonterminal('specifier-qualifier-list')])
-        reserve(Nonterminal('specifier-qualifier-list'),[Empty()])
+        reserve(Nonterminal('specifier-qualifier-listopt'),[Empty()])
 
         # # 一条声明语句的所有标识符 int x, y, z;
         # struct-declarator-list -> struct-declarator
-        # struct-declarator-list -> struct-declarator-list, struct-declarator
+        # struct-declarator-list -> struct-declarator-list , struct-declarator
         # 
         # struct-declarator -> declarator
         reserve(Nonterminal('struct-declarator-list'),
                 [Nonterminal('struct-declarator')])
         reserve(Nonterminal('struct-declarator-list'),
-                [Nonterminal('struct-declarator-list'),Nonterminal('struct-declarator')])
+                [Nonterminal('struct-declarator-list'),Terminal(Tag.COM, ','), Nonterminal('struct-declarator')])
         reserve(Nonterminal('struct-declarator'),
-                [Nonterminal(' declarator')])
+                [Nonterminal('declarator')])
 
         # 声明描述符
         # declarator -> pointeropt direct-declarator
@@ -872,6 +872,7 @@ class Production:
 
     def __eq__(self, other):
         if isinstance(other, Production):
+
             return self.header == other.header and self.body == other.body
         return False
     def __hash__(self):

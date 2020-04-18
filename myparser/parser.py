@@ -88,6 +88,8 @@ class Parser:
                         break
             return set(result)
 
+        # items
+        # items1
         scan_items = items[:]
         set_scan_items = set(scan_items)
         for item in scan_items:
@@ -159,10 +161,10 @@ class Parser:
         self.item_family.extend(temp_family)
 
         max_int = datetime.now() - datetime.now()
+        index = 0
         for I in self.item_family:
-            #print(datetime.now())
-            print(len(self.item_family))
-            index_I = self.item_family.index(I)
+            index_I =  index
+            index += 1
             # 获得该项集中所有的下一个symbol
             all_symbols = []
             for i in I:
@@ -219,42 +221,36 @@ class Parser:
         进行语法分析
         :return:
         '''
-
         def move():
             nonlocal look
             token = self.lexer.getnexttoken()
             look = Terminal.init_token(token[1])
         t1 = datetime.now()
         self.table(self.cfg)
-        k = 0
-        for items in self.item_family:
-            print("S" + str(k))
-            for i in items:
-                print(i)
-            k += 1
-            if k>1000 :
-                break
+        # k = 0
+        # for items in self.item_family:
+        #     print("S" + str(k))
+        #     for i in items:
+        #         print(i)
+        #     k += 1
+        #     if k>1000 :
+        #         break
         t2 = datetime.now()
         print("求闭包花费的时间为：" + str(t2-t1))
 
         # 初始化时将0状态放入状态栈中
         state_stack = [0,]
         node_stack = []
-
         # look为将下一个token变成的终结符
         look = None
         move()
         while True:
-            print(state_stack)
-            print(look)
             state_actions =  self.actions[state_stack[-1]]
             error_flag1 = True
             for action in state_actions:
                 if action[0] == look:
                     error_flag1 = False
                     #接收状态
-                    if state_stack[-1] == -1:
-                        return
                     if action[1] == -1:
                         if len(state_stack) != 2:
                             raise None # 规约完G之后还有问题
@@ -265,7 +261,7 @@ class Parser:
                     # 移入操作
                     elif action[1] == 0:
                         state_stack.append(action[2])
-                        node_stack.append(Node(look))
+                        node_stack.append(Node(look, self.lexer.row))
                         move()
                         break
                     # 规约操作
@@ -273,9 +269,12 @@ class Parser:
                         production = action[2]
                         num_of_s = production.get_num_body_smybol()
                         r_node = Node(production.header)
+                        r_row = self.lexer.row
                         for i in range(num_of_s):
                             state_stack.pop()
+                            r_row = node_stack[-1].lex_line
                             r_node.add_subnode(node_stack.pop())
+                        r_node.lex_line = r_row
                         goto_action = self.gotos[state_stack[-1]]
                         error_flag = True
                         for action in goto_action:
@@ -283,7 +282,6 @@ class Parser:
                                 error_flag = False
                                 state_stack.append(action[1])
                                 node_stack.append(r_node)
-
                         if error_flag:
                             print("error...") # 不能GOTO
                             return
@@ -291,5 +289,7 @@ class Parser:
             if error_flag1:
                 print("error") # 不能ACTION
                 return
+    def error_handler(self):
+        pass
 
 

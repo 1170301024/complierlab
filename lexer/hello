@@ -1,4 +1,7 @@
-
+struct {
+    int *pointer;
+    long * nextpointer;
+}item;
 int getSum(int x,int y);
 int main(){
     int x = y>0 ? 1 : 2 || 3 && 3>4+2*-z[0];
