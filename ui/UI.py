@@ -4,6 +4,7 @@ from tkinter import filedialog, ttk ,messagebox
 
 from lexer.Tag import Tag
 from lexer.lexer import Lexer
+from myparser.cfg import Terminal
 from myparser.parser import Parser
 
 root = Tk()
@@ -506,12 +507,16 @@ class UI:
             processTree.pack(fill=BOTH, expand=YES)
 
             # insert(parent,index,iid=None,**kw)
+            keys = ['ID', 'DECIMAL', 'FCONST', 'HEX', 'OCTAL', 'CCONST', 'STRING', 'REL']
             items.append(processTree.insert('',0,text=str(nodes[0].grammar_symbol)+' ('+str(nodes[0].lex_line)+')',open=True))
             for pNode in nodes:
                 pNodeItem = items[nodes.index(pNode)]
                 subNodes = pNode.get_subnodes()
                 for subNode in subNodes:
-                    screen_show = str(subNode.grammar_symbol)+' ('+str(subNode.lex_line)+')'
+                    if isinstance(subNode,Terminal) and subNode.character in Tag.show_value:
+                        screen_show = keys[Tag.show_value.index(subNode.character)] + ' :'+ str(subNode.grammar_symbol)+' ('+str(subNode.lex_line)+')'
+                    else:
+                        screen_show = str(subNode.grammar_symbol)+' ('+str(subNode.lex_line)+')'
                     items.append(processTree.insert(pNodeItem,0,text=screen_show,open=True))
                 nodes.extend(subNodes)
 
