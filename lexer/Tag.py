@@ -30,6 +30,7 @@ class Tag:
     VOID = 282
     WHILE = 283
     IF = 284
+    CASE = 285
 
     ID = 301
     ADD = 302
@@ -70,7 +71,7 @@ class Tag:
     key_show_strs = {'256': 'AUTO', '257':'BREAK' ,  '258':'CHAR', '259':'CONST',  '260':'CONTINUE', '261':'DEFAULT', '262':'DO',
                  '263':'DOUBLE', '264':'ELSE', '265': 'ENUM', '266':'EXTERN', '267':'FLOAT', '268':'FOR', '269':'GOTO',
                  '270':'INT', '271':'LONG', '272':'REGISTER', '273':'RETURN', '274':'SHORT','275': 'SIGNED', '276':'SIZEOF',
-                 '277':'STRUCT', '278':'SWITCH', '279':'TYPEDEF', '280':'UNION', '281':'UNSIGNED', '282':'VOID', '283':'WHILE','284':'IF'}
+                 '277':'STRUCT', '278':'SWITCH', '279':'TYPEDEF', '280':'UNION', '281':'UNSIGNED', '282':'VOID', '283':'WHILE','284':'IF','285':'CASE'}
 
     other_show_strs = {'302':'+', '303':'-', '304':'*', '305':'/', '306':'%', '307':'&&', '308':'||', '309':'!', '310':'REL',
                  '317':';', '318':'[', '319':']', '320':'.', '321':'}', '322':'{' , '323':'(' , '324':')', '325': ',' ,
@@ -84,4 +85,4 @@ class Tag:
     keys_dirt = {'auto' : 256, 'break' : 257,  'char': 258, 'const': 259,  'continue' : 260, 'default': 261, 'do': 262, 'double': 263,
                  'else': 264, 'enum': 265, 'extern': 266, 'float': 267, 'for': 268, 'goto': 269, 'int': 270, 'long': 271, 'register': 272,
                  'return': 273, 'short': 274, 'signed': 275, 'sizeof': 176, 'struct': 277, 'switch': 278, 'typedef': 279, 'union': 280,
-                 'unsigned': 281, 'void': 282, 'while': 283, 'if': 284}
+                 'unsigned': 281, 'void': 282, 'while': 283, 'if': 284,'case': 285}

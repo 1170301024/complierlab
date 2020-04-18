@@ -8,6 +8,6 @@ if __name__ == '__main__':
     lexer = Lexer()
     parser = Parser(lexer)
     items = []
-    items.append(Item(Production(Nonterminal('G'), [Nonterminal('P')]),[Terminal(Tag.END,'$')]))
+    items.append(Item(Production(Nonterminal('G'), [Nonterminal('program')]),[Terminal(Tag.END,'$')]))
     for item in parser.closure(items):
         print(item.__str__())

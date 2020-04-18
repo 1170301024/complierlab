@@ -424,6 +424,60 @@ class UI:
 
             window.mainloop()
 
+        # 前端打印First集
+        def printFirst():
+            # 初始化窗口
+            window = Tk()
+            window.title('LR分析表')
+            window.geometry('600x600')
+            window.resizable(0, 0)
+
+            # 框架用于存放First集
+            frame = Frame(window)
+            frame.pack(anchor=W, ipadx=10, side=LEFT, expand=True, fill=X)
+            # fill 以对齐->加滚轮
+            content = Text(frame, width=0, height=30)
+            content.pack(anchor=W, side=LEFT, expand=False)
+            content.configure(background=window.cget('background'), highlightbackground=window.cget('background'))
+
+            #列 （非终结符集合）
+            column = set()
+            column.add('DS')
+            for production in self.parser.cfg.R:
+                column.add(str(production.header))
+            column = list(column)
+            column.insert(0, 'state')
+            column = ['非终结符','First集']
+            treeview = ttk.Treeview(frame, height=19, columns=column, show='headings')
+            treeview.pack(anchor=W, ipadx=100, side=LEFT, expand=True, fill=BOTH)
+            treeview.column(column[0], width=100, anchor='center')
+            treeview.heading(column[0], text=column[0])
+            treeview.column(column[1], width=1000, anchor='w')
+            treeview.heading(column[1], text=column[1])
+            # ----vertical scrollbar------------
+            vbar1 = ttk.Scrollbar(treeview, orient=VERTICAL, command=treeview.yview)
+            treeview.configure(yscrollcommand=vbar1.set)
+            vbar1.pack(side=RIGHT, fill=Y)
+            # ----horizontal scrollbar----------
+            hbar1 = ttk.Scrollbar(treeview, orient=HORIZONTAL, command=treeview.xview)
+            treeview.configure(xscrollcommand=hbar1.set)
+            hbar1.pack(side=BOTTOM, fill=X)
+            window.rowconfigure(0, weight=1)
+            window.columnconfigure(0, weight=1)
+
+            count = 0
+            for i in self.parser.first_dict.keys():
+                temp = treeview.insert('', index=count)  # 新建行
+                treeview.set(temp, column=column[0], value=str(i))
+                first = []
+                for terminal in self.parser.first_dict[i]:
+                    first.append(str(terminal))
+                text = (', ').join(first)
+                treeview.set(temp,column=column[1],text=text)
+                count += 1
+            window.mainloop()
+
+        # 语法分析
         def syntaxAnalysis():
             '''
             用于输出文法分析结果
@@ -558,9 +612,9 @@ class UI:
 
             # 功能菜单
             # menuList = ['词法规则','词法分析','语法规则','语法分析','语义规则','语义分析']
-            action_list = ['DFA转换表','词法分析','LR分析表', '语法分析', '语义分析']
+            action_list = ['DFA转换表','词法分析','First集','LR分析表', '语法分析', '语义分析']
             # eventList = [lexicalRule,lexicalAnalysis,syntaxRule,syntaxAnalysis,semanticsRule,semanticsAnalysis]
-            action_event_list = [lexicalRule,lexicalAnalysis, syntaxRule, syntaxAnalysis, semanticsAnalysis]
+            action_event_list = [lexicalRule,lexicalAnalysis, printFirst,syntaxRule, syntaxAnalysis, semanticsAnalysis]
             action_menu = Menu(menubar)
             for menu, event in zip(action_list, action_event_list):
                 action_menu.add_command(label=menu, command=event)

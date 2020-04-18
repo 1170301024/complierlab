@@ -161,6 +161,7 @@ class Parser:
         max_int = datetime.now() - datetime.now()
         for I in self.item_family:
             #print(datetime.now())
+            print(len(self.item_family))
             index_I = self.item_family.index(I)
             # 获得该项集中所有的下一个symbol
             all_symbols = []
@@ -225,6 +226,14 @@ class Parser:
             look = Terminal.init_token(token[1])
         t1 = datetime.now()
         self.table(self.cfg)
+        k = 0
+        for items in self.item_family:
+            print("S" + str(k))
+            for i in items:
+                print(i)
+            k += 1
+            if k>1000 :
+                break
         t2 = datetime.now()
         print("求闭包花费的时间为：" + str(t2-t1))
 
@@ -236,13 +245,16 @@ class Parser:
         look = None
         move()
         while True:
-            # print(state_stack)
+            print(state_stack)
+            print(look)
             state_actions =  self.actions[state_stack[-1]]
             error_flag1 = True
             for action in state_actions:
                 if action[0] == look:
                     error_flag1 = False
                     #接收状态
+                    if state_stack[-1] == -1:
+                        return
                     if action[1] == -1:
                         if len(state_stack) != 2:
                             raise None # 规约完G之后还有问题
