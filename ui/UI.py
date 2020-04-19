@@ -305,8 +305,11 @@ class UI:
             用于前端打印LR分析表
             :return:
             '''
+            if self.lexer.program == None:
+                tkinter.messagebox.showinfo('提示', '未读取分析文件')
+                return
             if self.parser == None:
-                self.lexer.program = "int m;z=0x12;m = 2+3*4;c= 'a';double b;int[2][4] h;int[3] a;a[0] = 2;while(m>2) if(m<8)m = m +1;else m = m*2;"
+                # self.lexer.program = "int m;z=0x12;m = 2+3*4;c= 'a';double b;int[2][4] h;int[3] a;a[0] = 2;while(m>2) if(m<8)m = m +1;else m = m*2;"
                 self.lexer.initDFA("../lexer/dfa_table")
 
                 self.parser = Parser(self.lexer)
@@ -384,9 +387,8 @@ class UI:
 
             # GOTO
             column = set()
-            column.add('DS')
-            for production in self.parser.cfg.R:
-                column.add(str(production.header))
+            for production in self.parser.cfg.R.keys():
+                column.add(str(production))
             column = list(column)
             column.insert(0, 'state')
             treeview1 = ttk.Treeview(frame1, height=19, columns=column, show='headings')
@@ -443,9 +445,8 @@ class UI:
 
             #列 （非终结符集合）
             column = set()
-            column.add('DS')
-            for production in self.parser.cfg.R:
-                column.add(str(production.header))
+            for production in self.parser.cfg.R.keys():
+                column.add(str(production))
             column = list(column)
             column.insert(0, 'state')
             column = ['非终结符','First集']
@@ -467,11 +468,11 @@ class UI:
             window.columnconfigure(0, weight=1)
 
             count = 0
-            for i in self.parser.first_dict.keys():
+            for i in self.parser.firsts.keys():
                 temp = treeview.insert('', index=count)  # 新建行
                 treeview.set(temp, column=column[0], value=str(i))
                 first = []
-                for terminal in self.parser.first_dict[i]:
+                for terminal in self.parser.firsts[i]:
                     first.append(str(terminal))
                 text = (', ').join(first)
                 treeview.set(temp,column=column[1],text=text)
@@ -521,6 +522,10 @@ class UI:
                     items.append(processTree.insert(pNodeItem,0,text=screen_show,open=True))
                 nodes.extend(subNodes)
 
+            errors = self.parser.errors
+            for error in errors:
+                reason = "在 ‘%s’ 附近出现错误" %error[1]
+                errorHandler(error[0],reason)
             window.mainloop()
 
 
@@ -569,8 +574,8 @@ class UI:
 
             self.treeview.bind('<Button-1>',selectEvent)
 
-        def errorHandler(input,errortoken):
-            self.errorTreeview.insert('', self.errline, value=(input, errortoken.attr))
+        def errorHandler(input,error):
+            self.errorTreeview.insert('', self.errline, value=(input, error))
             self.errline += 1
 
         '''
