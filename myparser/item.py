@@ -33,7 +33,6 @@ class Item:
             return None
         else:
             return self.body[self.__loc]
-
     def beta_a(self):
         '''
         对于A -> [a.Bp, a](a 为alpha， p为beta)
@@ -45,7 +44,6 @@ class Item:
             return [Empty(),], self.symbols
         else:
             return self.body[self.__loc + 1:], self.symbols
-
     def next_item(self):
         '''
         获得下一个项
@@ -63,23 +61,17 @@ class Item:
         new_item.__loc += 1
         new_item.symbols = self.symbols[:]
         return new_item
-
     def get_production(self):
         '''
         获得该项所对应的产生式
         :return: 产生式对象
         '''
         return self.production
-
-
     def union_symbol(self, other):
         if not isinstance(other, Item):
             return False
         if self.production == other.production and self.__loc == other.__loc:
             return True
-
-
-
     def __str__(self):
         item_str = ''
         item_str +='[' + str(self.header) + ' -> '
@@ -100,7 +92,6 @@ class Item:
             item_str += str(s) + " "
         item_str += ']'
         return item_str
-
     def __eq__(self, other):
         if not isinstance(other, Item):
             return False

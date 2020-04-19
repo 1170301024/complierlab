@@ -21,16 +21,6 @@ class Cfg:
         # 开始符号
         self.S = Nonterminal("G'")
         self.grammer()
-
-    # def grammer(self):
-    #     def reserve(header, body):
-    #         self.R.append(Production(header, body))
-    #
-    #     reserve(Nonterminal('G'), [Nonterminal('S')])
-    #     reserve(Nonterminal('S'), [Nonterminal('C'), Nonterminal('C')])
-    #     reserve(Nonterminal('C'), [Terminal(0, 'c'), Nonterminal('C')])
-    #     reserve(Nonterminal('C'), [Terminal(1, 'd')])
-
     def grammer(self):
         def reserve(header, body):
             if header not in self.R.keys():
@@ -590,8 +580,6 @@ class Cfg:
         # 7.string-literal
         # string-literal -> STRING
         reserve(Nonterminal('string-literal'), [Terminal(Tag.STRING,'STRING')])
-
-
     """def grammer(self):
         '''
         初始化增广文法， 填充cfg列表
@@ -745,7 +733,6 @@ class Cfg:
         for const in [[Terminal(Tag.FCONST, 'FCONST')], [Terminal(Tag.HEX, 'HEX')], [Terminal(Tag.OCTAL, 'OCTAL')],
                       [Terminal(Tag.DECIMAL, 'DECIMAL')], [Terminal(Tag.CCONST, 'CCONST')]]:
             reserve(Nonterminal('CF'), const)"""
-
     def start_symbol(self):
         '''
         获得文法开始符号
@@ -777,7 +764,6 @@ class Terminal:
     '''
     终结符
     '''
-
     def __init__(self, character, show_str):
         # 终结符名称
         self.character = character

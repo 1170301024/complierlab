@@ -217,7 +217,6 @@ class Parser:
 
                 # 如果此时s是终结符，那么加入到actions中，并设为移入
                 if isinstance(s, Terminal):
-
                     if index_I in self.actions.keys():
                         self.actions[index_I].add((s, 0, index_new_I))
                     else:
