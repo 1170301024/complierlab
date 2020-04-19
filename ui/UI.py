@@ -513,10 +513,11 @@ class UI:
                 pNodeItem = items[nodes.index(pNode)]
                 subNodes = pNode.get_subnodes()
                 for subNode in subNodes:
-                    if isinstance(subNode,Terminal) and subNode.character in Tag.show_value:
-                        screen_show = keys[Tag.show_value.index(subNode.character)] + ' :'+ str(subNode.grammar_symbol)+' ('+str(subNode.lex_line)+')'
+                    symbol = subNode.grammar_symbol
+                    if isinstance(symbol,Terminal) and symbol.character in Tag.show_value:
+                        screen_show = keys[Tag.show_value.index(symbol.character)] + ' :'+ str(symbol)+' ('+str(subNode.lex_line)+')'
                     else:
-                        screen_show = str(subNode.grammar_symbol)+' ('+str(subNode.lex_line)+')'
+                        screen_show = str(symbol)+' ('+str(subNode.lex_line)+')'
                     items.append(processTree.insert(pNodeItem,0,text=screen_show,open=True))
                 nodes.extend(subNodes)
 

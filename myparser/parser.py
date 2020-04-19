@@ -22,9 +22,12 @@ class Parser:
         # GOTO函数
         # 其结构是一个字典 goto[i] = [(a, j), ()]
         self.gotos = {}
-
+        # first 集
+        self.firsts = {}
         # 树结构
         self.root_node = None
+        # 错误，其中每个错误项是一个元组，(错误行号， 可能的错误的字符)
+        self.errors = []
 
     def closure(self, items) -> []:
         '''
@@ -88,6 +91,35 @@ class Parser:
                         break
             return set(result)
 
+        def first_beta_a(item):
+            '''
+            求项集item的beta_a 的first集
+            :param item:
+            :return:
+            '''
+            beta_a = item.beta_a()
+            beta_a_s = []
+            beta_a_s.extend(beta_a[0])
+            first_set = set()
+            p_is_empty = False
+            for s in beta_a_s:
+                if s == beta_a_s[-1]:
+                    p_is_empty = True
+                if s not in self.firsts.keys():
+                    temp_first = first(s)
+                    self.firsts[s] = temp_first
+                else:
+                    temp_first = first(s)
+                first_set = first_set.union(temp_first)
+                first_set.discard(Empty())
+                if Empty() not in temp_first:
+                    p_is_empty = False
+                    break
+            if p_is_empty:
+                first_set = first_set.union(beta_a[1])
+            return first_set
+
+
         # items
         # items1
         scan_items = items[:]
@@ -97,29 +129,15 @@ class Parser:
             next_symbol = item.next_symbol()
             if not isinstance(next_symbol, Nonterminal):
                 continue
-            beta_a = item.beta_a()
-            beta_a_s = []
-            beta_a_s.extend(beta_a[0])
-            first_set = set()
-            p_is_empty = False
-            for s in beta_a_s:
-                if s == beta_a_s[-1]:
-                    p_is_empty = True
-                temp_first = first(s)
-                first_set = first_set.union(temp_first)
-                first_set.discard(Empty())
-                if Empty() not in temp_first:
-                    p_is_empty = False
-                    break
-            if p_is_empty:
-                first_set = first_set.union(beta_a[1])
+            first_set = first_beta_a(item)
             productions = self.cfg.get_rules(next_symbol)
             for p in productions:
                 new_item = Item(p, list(first_set))
-                if new_item in set_scan_items:
-                    continue
-                scan_items.append(new_item)
-                set_scan_items.add(new_item)
+                if new_item.next_symbol() is not None:
+                    if new_item in set_scan_items:
+                        continue
+                    scan_items.append(new_item)
+                    set_scan_items.add(new_item)
                 flag = True
                 for i in items:
                     if i.union_symbol(new_item):
@@ -155,11 +173,9 @@ class Parser:
         '''
         # 初始化项集族为[G->.p, $]
         start_production = G.get_rules(G.start_symbol())[0]
-        start_items = Item(start_production, [Terminal(Tag.END, '$')])
-        self.item_family = []
-        temp_family = [self.closure([start_items, ]),]
-        self.item_family.extend(temp_family)
-
+        start_items = [Item(start_production, [Terminal(Tag.END, '$')])]
+        temp_family = self.closure(start_items)
+        self.item_family.append(temp_family)
         max_int = datetime.now() - datetime.now()
         index = 0
         for I in self.item_family:
@@ -216,6 +232,7 @@ class Parser:
                     else:
                         self.gotos[index_I] = {(s, index_new_I),}
         print("求一个项集花费的最长时间为:" + str(max_int))
+
     def program(self):
         '''
         进行语法分析
@@ -225,16 +242,57 @@ class Parser:
             nonlocal look
             token = self.lexer.getnexttoken()
             look = Terminal.init_token(token[1])
+
+        # 2 -> A ->3 -> action token
+        def error_handler():
+            '''
+            错误处理
+            :return:
+            '''
+            self.errors.append((self.lexer.row, look))
+            top_state = state_stack[-1]
+            sub_nodes = []
+            while top_state not in self.gotos.keys():
+                state_stack.pop()
+                sub_nodes.append(node_stack.pop())
+                top_state = state_stack[-1]
+            goto_actions = self.gotos[top_state]
+
+            # 遍历当前栈顶状态下可以移入的所有非终结符
+            # 这样做的目的就是尽可能少的忽略token
+            while True:
+                if len(state_stack) == 1:
+                    state_stack[1] = 2
+                    return
+                move()
+                for action in goto_actions:
+                    restore_flag = False
+                    # 对应于移入一个非终结符之后的状态
+                    infer_state = action[1]
+                    flag1 = False
+                    if look == Terminal(Tag.END, '$'):
+                        flag1 = True
+                    for action_action in self.actions[infer_state]:
+                        # 找到了一个可以进行回复的look
+                        if action_action[0] == look:
+                            restore_flag = True
+                            flag1 = False
+                            break
+                    if flag1:
+                        while top_state not in self.gotos.keys():
+                            state_stack.pop()
+                            node_stack.pop()
+                            top_state = state_stack[-1]
+                        goto_actions = self.gotos[top_state]
+                    if restore_flag:
+                        state_stack.append(action[1])
+                        node_stack.append(Node(action[0], self.lexer.row))
+                        node_stack[-1].sub_nodes = sub_nodes
+                        return
+
+
         t1 = datetime.now()
         self.table(self.cfg)
-        # k = 0
-        # for items in self.item_family:
-        #     print("S" + str(k))
-        #     for i in items:
-        #         print(i)
-        #     k += 1
-        #     if k>1000 :
-        #         break
         t2 = datetime.now()
         print("求闭包花费的时间为：" + str(t2-t1))
 
@@ -245,6 +303,8 @@ class Parser:
         look = None
         move()
         while True:
+            # print(look)
+            # print(state_stack)
             state_actions =  self.actions[state_stack[-1]]
             error_flag1 = True
             for action in state_actions:
@@ -283,13 +343,13 @@ class Parser:
                                 state_stack.append(action[1])
                                 node_stack.append(r_node)
                         if error_flag:
-                            print("error...") # 不能GOTO
-                            return
+                            error_handler()
                         # 表明在该状态下该字符对应的动作为空
             if error_flag1:
-                print("error") # 不能ACTION
-                return
-    def error_handler(self):
-        pass
+                error_handler()
+
+
+
+
 
 

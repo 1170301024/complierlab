@@ -16,8 +16,8 @@ class Cfg:
         self.V = []
         # 终结符集合
         self.E = []
-        # 产生式集合
-        self.R = []
+        # 产生式字典，键是头，值是体列表
+        self.R = {}
         # 开始符号
         self.S = Nonterminal("G'")
         self.grammer()
@@ -33,7 +33,10 @@ class Cfg:
 
     def grammer(self):
         def reserve(header, body):
-            self.R.append(Production(header, body))
+            if header not in self.R.keys():
+                self.R[header] = [Production(header, body),]
+            else:
+                self.R[header].append(Production(header,body))
         # 增广文法
         reserve(Nonterminal("G'"), [Nonterminal('G')])
         reserve(Nonterminal('G'), [Nonterminal('program')])
@@ -447,7 +450,7 @@ class Cfg:
         reserve(Nonterminal('designationopt'),
                 [Empty()])
         reserve(Nonterminal('designation'),
-                [Nonterminal('designation-list'),Terminal(Tag.ASSIGN,'=')])
+                [Nonterminal('designator-list'),Terminal(Tag.ASSIGN,'=')])
         reserve(Nonterminal('designator-list'),
                 [Nonterminal('designator')])
         reserve(Nonterminal('designator-list'),
@@ -757,18 +760,15 @@ class Cfg:
         :return: 产生式的集合
         '''
         if not isinstance(nontermial, Nonterminal) :
-
             print("参数错误，需要传入一个Nonterminal类型的变量")
             raise TypeError
-        result = []
-        for rule in self.R:
-            if rule.header == nontermial:
-                result.append(rule)
-        return result
+        if nontermial not in self.R.keys():
+            return []
+        return self.R[nontermial]
 
     def __str__(self):
         productions = ''
-        for rule in self.R:
+        for rule in self.R.values():
             productions += str(rule)
         return productions
 

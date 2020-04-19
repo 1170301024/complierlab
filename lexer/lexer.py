@@ -18,7 +18,7 @@ class Lexer:
     # 获得下一个token
     def getnexttoken(self):
         if(self.forward == len(self.program)):
-            self.forward = 0
+            # self.forward = 0
             self.row = 1
             return ['end',Token(Tag.END)]
         self.lexmeBegin = self.forward
