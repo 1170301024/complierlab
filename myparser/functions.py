@@ -68,6 +68,9 @@ class Functions:
     def widen(self, addr, type1, type2):
         pass
 
+    def enter(self, name, type):
+        pass
+
     # 类型转换
     def type_conversion(self, type1, type2):
         pass

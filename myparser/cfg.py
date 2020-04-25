@@ -205,8 +205,7 @@ class Cfg:
         reserve(Nonterminal('constant-expression'),
                 [Nonterminal('conditional-expression')])
 
-
-        # 3.声明
+        """# 3.声明
         # declaration -> declaration-specifiers init-declarator-listopt ;
         # declaration-specifiers -> type-specifier declaration-specifiersopt
         # declaration-specifiersopt -> declaration-specifiers | e
@@ -449,6 +448,43 @@ class Cfg:
                 [Terminal(Tag.LRP,'['),Nonterminal('constant-expression'),Terminal(Tag.RRP,']')])
         reserve(Nonterminal('designator'),
                 [Terminal(Tag.DOT, '.'), Terminal(Tag.ID, 'ID')])
+"""
+
+        # 3.声明
+        # D -> T id ;
+        # T -> B C
+        # T -> * T
+        # B -> int | real
+        # C -> e
+        # C -> [ num ] C
+        reserve(Nonterminal('declaration'),
+                [Nonterminal('type'),Terminal(Tag.ID,'ID'),Terminal(Tag.SEMI,';')])
+        reserve(Nonterminal('type'),
+                [Nonterminal('basic'), Nonterminal('C')])
+        reserve(Nonterminal('type'),
+                [Terminal(Tag.MUILT,'*'), Nonterminal('type')])
+        reserve(Nonterminal('basic'),
+                [Terminal(Tag.INT, 'INT')])
+        reserve(Nonterminal('basic'),
+                [Terminal(Tag.FLOAT, 'FLOAT')])
+        reserve(Nonterminal('basic'),
+                [Terminal(Tag.VOID, 'VOID')])
+        reserve(Nonterminal('basic'),
+                [Terminal(Tag.DOUBLE, 'DOUBLE')])
+        reserve(Nonterminal('C'),
+                [Empty()])
+        reserve(Nonterminal('C'),
+                [Terminal(Tag.LRP,'['),Nonterminal('constant-expression'),Terminal(Tag.RRP,']'),Nonterminal('C')])
+
+        # 结构体
+        reserve(Nonterminal('type'),
+                [Terminal(Tag.STRUCT,'STRUCT'),Terminal(Tag.LP,'{'),Nonterminal('struct-declaration-list'),Terminal(Tag.RP,'}')])
+        reserve(Nonterminal('struct-declaration-list'),
+                [Nonterminal('struct-declaration')])
+        reserve(Nonterminal('struct-declaration-list'),
+                [Nonterminal('struct-declaration-list'),Nonterminal('struct-declaration')])
+        reserve(Nonterminal('struct-declaration'),
+                [Nonterminal('type'),Terminal(Tag.ID,'ID'),Terminal(Tag.SEMI,';')])
 
         # 4.语句和块
         # statement -> labeled-statement | compound-statement | expression-statement

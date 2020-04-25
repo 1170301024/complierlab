@@ -103,3 +103,12 @@ class function(Type):
         '''
         return self.params_list
 
+class Pointer(Type):
+    """
+    Pointer类用于
+    """
+    def __init__(self, type_str, stype):
+        super().__init__(type_str, width=8)
+        self.type_str = type_str
+        self.stype = stype
+

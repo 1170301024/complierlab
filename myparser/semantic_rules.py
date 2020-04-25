@@ -3,7 +3,7 @@ from myparser.functions import *
 #    $   A    |   B   |   C   |   D  <- LR stack
 #      addr :v|                      <- 属性
 # #    type :t|
-from myparser.type import Type
+from myparser.type import Type, Array, Pointer, struct
 
 
 class Rules:
@@ -168,27 +168,21 @@ class Rules:
     def relational_expression_3(self, stack, top):
         temp_addr = stack[top-2]['addr']
         stack[top-2]['addr'] = self.functions.newtemp()
-        '''改了'''
         self.functions.gen('>',temp_addr,stack[top]['addr'],stack[top-2]['addr'])
-        '''需改正'''
         stack[top-2]['type'] = Type('int', 4)
         top -= 2
 
     def relational_expression_4(self, stack, top):
         temp_addr = stack[top-2]['addr']
         stack[top-2]['addr'] = self.functions.newtemp()
-        '''改了'''
         self.functions.gen('<=',temp_addr,stack[top]['addr'],stack[top-2]['addr'])
-        '''需改正'''
         stack[top-2]['type'] = Type('int', 4)
         top -= 2
 
     def relational_expression_5(self, stack, top):
         temp_addr = stack[top-2]['addr']
         stack[top-2]['addr'] = self.functions.newtemp()
-        '''改了'''
         self.functions.gen('>=',temp_addr,stack[top]['addr'],stack[top-2]['addr'])
-        '''需改正'''
         stack[top-2]['type'] = Type('int', 4)
         top -= 2
 
@@ -214,6 +208,7 @@ class Rules:
         self.functions.gen('=', stack[top]['addr'], result=stack[top-2]['addr'])
         stack[top]['addr'] = stack[top]['addr']
         stack[top]['type'] = stack[top]['type']
+        top -= 2
 
     # 赋值操作符
     def assignment_operator_1(self, stack, top):
@@ -256,4 +251,58 @@ class Rules:
         self.functions.backpatch(stack[top-3]['nextlist'], stack[top - 1]['quad'])
         self.functions.gen('goto', result=stack[top-5]['quad'])
         top -= 6
+
+    # 声明
+    def declaration_1(self, stack, top):
+        self.functions.enter(stack[top-1]['lexeme'],stack[top-1]['type'])
+        top -= 2
+
+    def type_1(self, stack, top):
+        stack[top-1]['type'] = stack[top]['type']
+        top -= 1
+
+    def M_2(self, stack, top):
+        self.t = stack[top]['type']
+
+    def type_2(self, stack, top):
+        stack[top-1]['type'] = Pointer('pointer',stack[top]['type'])
+        top -= 2
+
+    def type_3(self, stack, top):
+        stack[top-3]['type'] = struct('struct',self.temp_field)
+        top -= 3
+
+    def struct_declaration_list_1(self, stack, top):
+        self.temp_field = [(stack[top]['id'],stack[top]['type'])]
+
+    def struct_declaration_list_2(self, stack, top):
+        self.temp_field.append((stack[top]['id'],stack[top]['type']))
+        top -= 1
+
+    def struct_declaration_1(self, stack, top):
+        stack[top-2]['id'] = stack[top - 1]['lexeme']
+        stack[top-2]['type'] = stack[top - 1]['type']
+        top -= 2
+
+    def basic_1(self, stack, top):
+        stack[top]['type'] = Type('int', 4)
+
+    def basic_2(self, stack, top):
+        stack[top]['type'] = Type('float', 4)
+
+    def basic_3(self, stack, top):
+        stack[top]['type'] = Type('void', 0)
+
+    def basic_4(self, stack, top):
+        stack[top]['type'] = Type('double', 8)
+
+    def C_1(self, stack, top):
+        stack[top+1]['type'] = self.t
+
+    def C_2(self, stack, top):
+        stack[top-3]['type'] = Array('array',stack[top-2]['addr'],stack[top]['type'])
+        top -= 3
+
+
+
 
