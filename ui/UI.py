@@ -449,7 +449,7 @@ class UI:
                 column.add(str(production))
             column = list(column)
             column.insert(0, 'state')
-            column = ['非终结符','First集']
+            column = ['符号','First集']
             treeview = ttk.Treeview(frame, height=19, columns=column, show='headings')
             treeview.pack(anchor=W, ipadx=100, side=LEFT, expand=True, fill=BOTH)
             treeview.column(column[0], width=100, anchor='center')
@@ -475,7 +475,7 @@ class UI:
                 for terminal in self.parser.firsts[i]:
                     first.append(str(terminal))
                 text = (', ').join(first)
-                treeview.set(temp,column=column[1],text=text)
+                treeview.set(temp,column=column[1],value=text)
                 count += 1
             window.mainloop()
 
@@ -523,6 +523,7 @@ class UI:
                 nodes.extend(subNodes)
 
             errors = self.parser.errors
+            clear(self.errorTreeview)
             for error in errors:
                 reason = "在 ‘%s’ 附近出现错误" %error[1]
                 errorHandler(error[0],reason)
