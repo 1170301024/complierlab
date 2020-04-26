@@ -74,5 +74,3 @@ class Functions:
     # 类型转换
     def type_conversion(self, type1, type2):
         pass
-
-

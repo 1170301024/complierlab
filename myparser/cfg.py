@@ -1,4 +1,5 @@
 from lexer.Tag import Tag
+from myparser.semantic_rules import Rules
 from token import Token
 
 
@@ -21,12 +22,14 @@ class Cfg:
         # 开始符号
         self.S = Nonterminal("G'")
         self.grammer()
+
+        self.rules = Rules()
     def grammer(self):
-        def reserve(header, body):
+        def reserve(header, body, rule=None) :
             if header not in self.R.keys():
-                self.R[header] = [Production(header, body),]
+                self.R[header] = [Production(header, body, rule),]
             else:
-                self.R[header].append(Production(header,body))
+                self.R[header].append(Production(header,body, rule))
         # 增广文法
         reserve(Nonterminal("G'"), [Nonterminal('G')])
         reserve(Nonterminal('G'), [Nonterminal('program')])
@@ -36,9 +39,11 @@ class Cfg:
 
         # 基本表达式
         # primary-expression -> ID | constant | string-literal | ( expression )
-        for i in [[Terminal(Tag.ID,'ID')],[Nonterminal('constant')],
-                  [Nonterminal('string-literal')],[Terminal(Tag.SLP,'('),Nonterminal('expression'),Terminal(Tag.SRP,')')]]:
-            reserve(Nonterminal('primary-expression'),i)
+        reserve(Nonterminal('primary-expression'),[Terminal(Tag.ID,'ID')], self.rules.primary_expression_rule_1)
+        reserve(Nonterminal('primary-expression'), [Nonterminal('constant')], self.rules.primary_expression_rule_2)
+        reserve(Nonterminal('primary-expression'), [Nonterminal('string-literal')])
+        reserve(Nonterminal('primary-expression'), [Terminal(Tag.SLP,'('),Nonterminal('expression'),Terminal(Tag.SRP,')')],
+                self.rules.primary_expression_rule_3)
 
         # 后缀操作符
         # postfix-expression -> primary-expression
@@ -52,20 +57,23 @@ class Cfg:
         # argument-expression-list -> assignment-expression
         # argument-expression-list -> argument-expression-list, assignment-expression
         reserve(Nonterminal('postfix-expression'),
-                [Nonterminal('primary-expression')])
+                [Nonterminal('primary-expression')], self.rules.postfix_expression_rule_1)
         reserve(Nonterminal('postfix-expression'),
-                [Nonterminal('postfix-expression'),Terminal(Tag.LRP,'['),Nonterminal('expression'),Terminal(Tag.RRP,']')])
+                [Nonterminal('postfix-expression'),Terminal(Tag.LRP,'['),Nonterminal('expression'),Terminal(Tag.RRP,']')],
+                self.rules.postfix_expression_rule_2)
         reserve(Nonterminal('postfix-expression'),
-                [Nonterminal('postfix-expression'),Terminal(Tag.SLP,'('),Nonterminal("argument-expression-listopt"),Terminal(Tag.SRP,')')])
+                [Nonterminal('postfix-expression'),Terminal(Tag.SLP,'('),Nonterminal("argument-expression-listopt"),Terminal(Tag.SRP,')')],
+                self.rules.postfix_expression_rule_3)
 
         reserve(Nonterminal('argument-expression-listopt'),
                 [Nonterminal('argument-expression-list')])
         reserve(Nonterminal('argument-expression-listopt'),
                 [Empty()])
         reserve(Nonterminal('argument-expression-list'),
-                [Nonterminal('assignment-expression')])
+                [Nonterminal('assignment-expression')], self.rules.argument_expression_list_1)
         reserve(Nonterminal('argument-expression-list'),
-                [Nonterminal('argument-expression-list'),Terminal(Tag.COM,','),Nonterminal('assignment-expression')])
+                [Nonterminal('argument-expression-list'),Terminal(Tag.COM,','),Nonterminal('assignment-expression')],
+                self.rules.argument_expression_list_2)
         # 一元操作符
         # unary-expression -> postfix-expression
         # unary-expression -> ++ unary-expression
@@ -73,11 +81,13 @@ class Cfg:
         # unary-expression -> unary-operator cast-expression
         # unary-operator -> & | * | + |-| ~ | !
         reserve(Nonterminal('unary-expression'),
-                [Nonterminal('postfix-expression')])
+                [Nonterminal('postfix-expression')], self.rules.unary_expression_1)
         reserve(Nonterminal('unary-expression'),
-                [Nonterminal('unary-operator'),Nonterminal('cast-expression')])
-        for i in [[Terminal(Tag.MUILT,'*')],[Terminal(Tag.ADD,'+')],[Terminal(Tag.SUB,'-')]]:
-            reserve(Nonterminal('unary-operator'),i)
+                [Nonterminal('unary-operator'),Nonterminal('cast-expression')],
+                self.rules.unary_expression_2)
+        reserve(Nonterminal('unary-operator'),[Terminal(Tag.MUILT,'*')], self.rules.unary_operator_1)
+        reserve(Nonterminal('unary-operator'), [Terminal(Tag.ADD,'+')], self.rules.unary_operator_2)
+        reserve(Nonterminal('unary-operator'), [Terminal(Tag.MUILT, '-')], self.rules.unary_operator_3)
 
         # cast 操作符
         # cast-expression -> unary-expression
@@ -86,7 +96,8 @@ class Cfg:
                 [Nonterminal('unary-expression')])
         reserve(Nonterminal('cast-expression'),
                 [Terminal(Tag.SLP,'('),Nonterminal('type-name'),
-                 Terminal(Tag.SRP,')'),Nonterminal("cast-expression")])
+                 Terminal(Tag.SRP,')'),Nonterminal("cast-expression")],
+                self.rules.cast_expression_2)
 
         # 乘除表达式
         # multiplicative-expression -> cast-expression
@@ -96,11 +107,14 @@ class Cfg:
         reserve(Nonterminal('multiplicative-expression'),
                 [Nonterminal('cast-expression')])
         reserve(Nonterminal('multiplicative-expression'),
-                [Nonterminal('multiplicative-expression'),Terminal(Tag.MUILT,'*'),Nonterminal('cast-expression')])
+                [Nonterminal('multiplicative-expression'),Terminal(Tag.MUILT,'*'),Nonterminal('cast-expression')],
+                self.rules.multiplicative_expression_2)
         reserve(Nonterminal('multiplicative-expression'),
-                [Nonterminal('multiplicative-expression'),Terminal(Tag.DIV,'/'),Nonterminal('cast-expression')])
+                [Nonterminal('multiplicative-expression'),Terminal(Tag.DIV,'/'),Nonterminal('cast-expression')],
+                self.rules.multiplicative_expression_3)
         reserve(Nonterminal('multiplicative-expression'),
-                [Nonterminal('multiplicative-expression'),Terminal(Tag.MOD,'%'),Nonterminal('cast-expression')])
+                [Nonterminal('multiplicative-expression'),Terminal(Tag.MOD,'%'),Nonterminal('cast-expression')],
+                self.rules.multiplicative_expression_4)
 
 
         # 加减表达式
@@ -110,9 +124,11 @@ class Cfg:
         reserve(Nonterminal('additive-expression'),
                 [Nonterminal('multiplicative-expression')])
         reserve(Nonterminal('additive-expression'),
-                [Nonterminal('additive-expression'), Terminal(Tag.ADD, '+'), Nonterminal('multiplicative-expression')])
+                [Nonterminal('additive-expression'), Terminal(Tag.ADD, '+'), Nonterminal('multiplicative-expression')],
+                self.rules.additive_expression_2)
         reserve(Nonterminal('additive-expression'),
-                [Nonterminal('additive-expression'), Terminal(Tag.SUB, '-'), Nonterminal('multiplicative-expression')])
+                [Nonterminal('additive-expression'), Terminal(Tag.SUB, '-'), Nonterminal('multiplicative-expression')],
+                self.rules.additive_expression_3)
 
         # 移位操作符
         # shift-expression -> additive-expression
@@ -130,7 +146,8 @@ class Cfg:
         reserve(Nonterminal('relational-expression'),
                 [Nonterminal('additive-expression')])
         reserve(Nonterminal('relational-expression'),
-                [Nonterminal('relational-expression'),Terminal(Tag.REL,'REL'),Nonterminal('additive-expression')])
+                [Nonterminal('relational-expression'),Terminal(Tag.REL,'REL'),Nonterminal('additive-expression')],
+                self.rules.relational_expression_2)
 
         # 等价操作符
         # equality-expression -> relational-expression
@@ -152,7 +169,8 @@ class Cfg:
         reserve(Nonterminal('logical-AND-expression'),
                 [Nonterminal('relational-expression')])
         reserve(Nonterminal('logical-AND-expression'),
-                [Nonterminal('logical-AND-expression'),Terminal(Tag.AND,'&&'),Nonterminal('relational-expression')])
+                [Nonterminal('logical-AND-expression'),Terminal(Tag.AND,'&&'),Nonterminal('relational-expression')],
+                self.rules.logical_AND_expression_2)
 
         # 逻辑或操作符
         # logical-OR-expression -> logical-AND-expression
@@ -178,14 +196,15 @@ class Cfg:
         reserve(Nonterminal('assignment-expression'),
                 [Nonterminal('logical-OR-expression')])
         reserve(Nonterminal('assignment-expression'),
-                [Nonterminal('assignment-expression'),Nonterminal('assignment-operator'),Nonterminal('assignment-expression')])
+                [Nonterminal('assignment-expression'),Nonterminal('assignment-operator'),Nonterminal('assignment-expression')],
+                self.rules.assignment_expression_2)
         for i in [[Terminal(Tag.ASSIGN,'=')],
                   [Terminal(Tag.MUILT,'*'),Terminal(Tag.ASSIGN,'=')],
                   [Terminal(Tag.DIV,'/'),Terminal(Tag.ASSIGN,'=')],
                   [Terminal(Tag.MOD,'%'),Terminal(Tag.ASSIGN,'=')],
                   [Terminal(Tag.ADD,'+'),Terminal(Tag.ASSIGN,'=')],
                   [Terminal(Tag.SUB,'-'),Terminal(Tag.ASSIGN,'=')]]:
-            reserve(Nonterminal('assignment-operator'), i)
+            reserve(Nonterminal('assignment-operator'), i, self.rules.assignment_operator_1)
 
         # 逗号操作符
         # expression -> assignment-expression
@@ -194,7 +213,8 @@ class Cfg:
         reserve(Nonterminal('expression'),
                 [Nonterminal('assignment-expression')])
         reserve(Nonterminal('expression'),
-                [Nonterminal('expression'),Terminal(Tag.COM,','),Nonterminal('assignment-expression')])
+                [Nonterminal('expression'),Terminal(Tag.COM,','),Nonterminal('assignment-expression')],
+                self.rules.expression_2)
         reserve(Nonterminal('expressionopt'),
                 [Nonterminal('expression')])
         reserve(Nonterminal('expressionopt'),
@@ -458,42 +478,62 @@ class Cfg:
         # C -> e
         # C -> [ num ] C
         reserve(Nonterminal('declaration'),
-                [Nonterminal('type'),Terminal(Tag.ID,'ID'),Terminal(Tag.SEMI,';')])
+                [Nonterminal('type'),Terminal(Tag.ID,'ID'),Terminal(Tag.SEMI,';')],
+                self.rules.declaration_1)
         reserve(Nonterminal('type'),
-                [Nonterminal('basic'), Nonterminal('C')])
+                [Nonterminal('basic'), Nonterminal('M_2'), Nonterminal('C')],
+                self.rules.type_1)
+        reserve(Nonterminal('M_2'), [Empty()], self.rules.M_2)
         reserve(Nonterminal('type'),
-                [Nonterminal('type'), Terminal(Tag.MUILT,'*')])
+                [Nonterminal('type'), Terminal(Tag.MUILT,'*')],
+                self.rules.type_2)
         reserve(Nonterminal('basic'),
-                [Terminal(Tag.INT, 'INT')])
+                [Terminal(Tag.INT, 'INT')],
+                self.rules.basic_1)
         reserve(Nonterminal('basic'),
-                [Terminal(Tag.FLOAT, 'FLOAT')])
+                [Terminal(Tag.FLOAT, 'FLOAT')],
+                self.rules.basic_2)
         reserve(Nonterminal('basic'),
-                [Terminal(Tag.VOID, 'VOID')])
+                [Terminal(Tag.VOID, 'VOID')],
+                self.rules.basic_3)
         reserve(Nonterminal('basic'),
-                [Terminal(Tag.DOUBLE, 'DOUBLE')])
+                [Terminal(Tag.DOUBLE, 'DOUBLE')],
+                self.rules.basic_4)
+        reserve(Nonterminal('basic'),
+                [Terminal(Tag.CHAR, 'CHAR')],
+                self.rules.basic_5)
         reserve(Nonterminal('C'),
-                [Empty()])
+                [Empty()], self.rules.C_1)
         reserve(Nonterminal('C'),
-                [Terminal(Tag.LRP,'['),Nonterminal('constant'),Terminal(Tag.RRP,']'),Nonterminal('C')])
+                [Terminal(Tag.LRP,'['),Nonterminal('constant'),Terminal(Tag.RRP,']'),Nonterminal('C')],
+                self.rules.C_2)
 
         # 结构体
         reserve(Nonterminal('type'),
-                [Terminal(Tag.STRUCT,'STRUCT'),Terminal(Tag.LP,'{'),Nonterminal('struct-declaration-list'),Terminal(Tag.RP,'}')])
+                [Terminal(Tag.STRUCT,'STRUCT'),Terminal(Tag.LP,'{'),Nonterminal('struct-declaration-list'),Terminal(Tag.RP,'}')],
+                self.rules.type_3)
         reserve(Nonterminal('struct-declaration-list'),
-                [Nonterminal('struct-declaration')])
+                [Nonterminal('struct-declaration')],
+                self.rules.struct_declaration_list_1)
         reserve(Nonterminal('struct-declaration-list'),
-                [Nonterminal('struct-declaration-list'),Nonterminal('struct-declaration')])
+                [Nonterminal('struct-declaration-list'),Nonterminal('struct-declaration')],
+                self.rules.struct_declaration_list_2)
         reserve(Nonterminal('struct-declaration'),
-                [Nonterminal('type'),Terminal(Tag.ID,'ID'),Terminal(Tag.SEMI,';')])
+                [Nonterminal('type'),Terminal(Tag.ID,'ID'),Terminal(Tag.SEMI,';')],
+                self.rules.struct_declaration_1)
 
         # 4.语句和块
         # statement -> labeled-statement | compound-statement | expression-statement
         #                   | selection-statement | iteration-statement | jump-statement
         reserve(Nonterminal('statement'), [Nonterminal('labeled-statement')])
-        reserve(Nonterminal('statement'), [Nonterminal('compound-statement')])
-        reserve(Nonterminal('statement'), [Nonterminal('expression-statement')])
-        reserve(Nonterminal('statement'), [Nonterminal('selection-statement')])
-        reserve(Nonterminal('statement'), [Nonterminal('iteration-statement')])
+        reserve(Nonterminal('statement'), [Nonterminal('compound-statement')],
+                self.rules.statement)
+        reserve(Nonterminal('statement'), [Nonterminal('expression-statement')],
+                self.rules.statement)
+        reserve(Nonterminal('statement'), [Nonterminal('selection-statement')],
+                self.rules.statement)
+        reserve(Nonterminal('statement'), [Nonterminal('iteration-statement')],
+                self.rules.statement)
         reserve(Nonterminal('statement'), [Nonterminal('jump-statement')])
 
         # labeled statements
@@ -515,38 +555,43 @@ class Cfg:
         # block-item -> declaration
         # block-item -> statement
         reserve(Nonterminal('compound-statement'),
-                [Terminal(Tag.LP,'{'),Nonterminal('block-item-listopt'),Terminal(Tag.RP,'}')])
+                [Terminal(Tag.LP,'{'),Nonterminal('block-item-listopt'),Terminal(Tag.RP,'}')],
+                self.rules.compound_statement_1)
         reserve(Nonterminal('block-item-listopt'),
-                [Nonterminal('block-item-list')])
+                [Nonterminal('block-item-list')],
+                self.rules.block_item_listopt_1)
         reserve(Nonterminal('block-item-listopt'),
-                [Empty()])
+                [Empty()], self.rules.block_item_listopt_2)
         reserve(Nonterminal('block-item-list'),
-                [Nonterminal('block-item')])
+                [Nonterminal('block-item')], self.rules.block_item_list_1)
         reserve(Nonterminal('block-item-list'),
-                [Nonterminal('block-item-list'),Nonterminal('block-item')])
+                [Nonterminal('block-item-list'),Nonterminal('block-item')], self.rules.block_item_list_2)
 
         reserve(Nonterminal('block-item'),
-                [Nonterminal('declaration')])
+                [Nonterminal('declaration')], self.rules.block_item_1)
         reserve(Nonterminal('block-item'),
-                [Nonterminal('statement')])
+                [Nonterminal('statement')], self.rules.block_item_2)
 
         # expression and null statements
         # expression-statement -> expressionopt ;
         reserve(Nonterminal('expression-statement'),
-                [Nonterminal('expressionopt'),Terminal(Tag.SEMI,';')])
+                [Nonterminal('expressionopt'),Terminal(Tag.SEMI,';')],
+                self.rules.expression_statement_1)
 
         # selectiong statements
         # selection-statement -> IF(expression) statement
         # selection-statement -> IF(expression) statement else statement
         # selection-statement -> switch(expression) statement
         reserve(Nonterminal('selection-statement'),
-                [Terminal(Tag.IF, 'IF'),Terminal(Tag.SLP, '('),Nonterminal('expression'), Nonterminal('goto_M'), Terminal(Tag.SRP, ')'), Nonterminal('M'), Nonterminal('statement')])
-        reserve(Nonterminal('goto_M'), [Empty()])
-        reserve(Nonterminal('M'), [Empty()])
+                [Terminal(Tag.IF, 'IF'),Terminal(Tag.SLP, '('),Nonterminal('expression'), Nonterminal('goto_M'), Terminal(Tag.SRP, ')'), Nonterminal('M'), Nonterminal('statement')],
+                self.rules.selection_statement_rule_1)
+        reserve(Nonterminal('goto_M'), [Empty()], self.rules.goto_M)
+        reserve(Nonterminal('M'), [Empty()], self.rules.M_1)
         reserve(Nonterminal('selection-statement'),
                 [Terminal(Tag.IF, 'IF'), Terminal(Tag.SLP, '('), Nonterminal('expression'), Nonterminal('goto_M'), Terminal(Tag.SRP, ')'),
-                 Nonterminal('M'), Nonterminal('statement'), Nonterminal('N'),Terminal(Tag.ELSE, 'ELSE'),Nonterminal('statement')])
-        reserve(Nonterminal('N'), [Empty()])
+                 Nonterminal('M'), Nonterminal('statement'), Nonterminal('N'),Terminal(Tag.ELSE, 'ELSE'),Nonterminal('statement')],
+                self.rules.selection_statement_rule_2)
+        reserve(Nonterminal('N'), [Empty()], self.rules.N_1)
         reserve(Nonterminal('selection-statement'),
                 [Terminal(Tag.SWITCH, 'SWITCH'), Terminal(Tag.SLP, '('), Nonterminal('expression'), Terminal(Tag.SRP, ')'),
                  Nonterminal('statement')])
@@ -557,8 +602,9 @@ class Cfg:
         # iteration-statement -> for ( expressionopt; expressionopt; expressionopt ) statement
         # iteration-statement -> for ( declaration expressionopt; expressionopt ) statement
         reserve(Nonterminal('iteration-statement'),
-                [Terminal(Tag.WHILE, 'WHILE'), Terminal(Tag.SLP, '('), Nonterminal('expression'),
-                 Nonterminal('goto_M'), Terminal(Tag.SRP, ')'), Nonterminal('M'), Nonterminal('statement')])
+                [Terminal(Tag.WHILE, 'WHILE'), Nonterminal('M'), Terminal(Tag.SLP, '('), Nonterminal('expression'),
+                 Nonterminal('goto_M'), Terminal(Tag.SRP, ')'), Nonterminal('M'), Nonterminal('statement')],
+                self.rules.iteration_statement_rule_1)
         reserve(Nonterminal('iteration-statement'),
                 [Terminal(Tag.DO,'DO'),Nonterminal('statement'),Terminal(Tag.WHILE, 'WHILE'), Terminal(Tag.SLP, '('), Nonterminal('expression'),
                  Terminal(Tag.SRP, ')'), Terminal(Tag.SEMI,';')])
@@ -610,28 +656,41 @@ class Cfg:
         # args -> type ID
         reserve(Nonterminal('function-definition'), [Nonterminal('type'), Terminal(Tag.ID, 'id'),
                                                      Terminal(Tag.SLP, '('), Nonterminal('args-listopt'),
-                                                     Terminal(Tag.SRP, ')'), Nonterminal('compound-statement')])
+                                                     Terminal(Tag.SRP, ')'), Nonterminal('compound-statement')],
+                self.rules.function_definition)
         reserve(Nonterminal('args-listopt'), [Nonterminal('args-list')])
-        reserve(Nonterminal('args-listopt'), [Empty()])
-        reserve(Nonterminal('args-list'), [Nonterminal('args')])
-        reserve(Nonterminal('args-list'), [Nonterminal('args-list'), Terminal(Tag.COM, ','), Nonterminal('args')])
-        reserve(Nonterminal('args'), [Nonterminal('type'), Terminal(Tag.ID, 'id')])
+        reserve(Nonterminal('args-listopt'), [Empty()],
+                self.rules.args_listopt)
+        reserve(Nonterminal('args-list'), [Nonterminal('args')],
+                self.rules.args_list_1)
+        reserve(Nonterminal('args-list'), [Nonterminal('args-list'), Terminal(Tag.COM, ','), Nonterminal('args')],
+                self.rules.args_list_2)
+        reserve(Nonterminal('args'), [Nonterminal('type'), Terminal(Tag.ID, 'id')],
+                self.rules.args_1)
 
         # 常量
-        reserve(Nonterminal('constant'), [Nonterminal('integer-constant')])
-        reserve(Nonterminal('constant'), [Nonterminal('floating-constant')])
-        reserve(Nonterminal('constant'), [Nonterminal('character-constant')])
+        reserve(Nonterminal('constant'), [Nonterminal('integer-constant')],
+                self.rules.constant_rule_1)
+        reserve(Nonterminal('constant'), [Nonterminal('floating-constant')],
+                self.rules.constant_rule_2)
+        reserve(Nonterminal('constant'), [Nonterminal('character-constant')],
+                self.rules.constant_rule_3)
         # 整形常量
         # integer-constant -> DECIMAL | HEX | OCTAL
-        reserve(Nonterminal('integer-constant'), [Terminal(Tag.DECIMAL,'DECIMAL')])
-        reserve(Nonterminal('integer-constant'), [Terminal(Tag.HEX, 'HEX')])
-        reserve(Nonterminal('integer-constant'), [Terminal(Tag.OCTAL, 'OCTAL')])
+        reserve(Nonterminal('integer-constant'), [Terminal(Tag.DECIMAL,'DECIMAL')],
+                self.rules.integer_constant_rule_1)
+        reserve(Nonterminal('integer-constant'), [Terminal(Tag.HEX, 'HEX')],
+                self.rules.integer_constant_rule_2)
+        reserve(Nonterminal('integer-constant'), [Terminal(Tag.OCTAL, 'OCTAL')],
+                self.rules.integer_constant_rule_3)
         # 浮点常量
         # floating-constant -> FCONST
-        reserve(Nonterminal('floating-constant'), [Terminal(Tag.FCONST, 'FCONST')])
+        reserve(Nonterminal('floating-constant'), [Terminal(Tag.FCONST, 'FCONST')],
+                self.rules.floating_constant_rule)
         # 字符常量
         # character-constant -> CCONST
-        reserve(Nonterminal('character-constant'), [Terminal(Tag.CCONST, 'CCONST')])
+        reserve(Nonterminal('character-constant'), [Terminal(Tag.CCONST, 'CCONST')],
+                self.rules.character_constant_rule)
 
         # 7.string-literal
         # string-literal -> STRING
@@ -889,9 +948,10 @@ class Production:
     产生式
     header -> body
     '''
-    def __init__(self, header, body):
+    def __init__(self, header, body, semantic_rule):
         self.header = header
         self.body = body
+        self.semantic_rule = semantic_rule
 
     def get_num_body_smybol(self):
         if len(self.body) == 1 and isinstance(self.body[0], Empty):
@@ -900,6 +960,9 @@ class Production:
 
     def get_header(self):
         return self.header
+
+    def get_semantic_rule(self):
+        return self.semantic_rule
     def __str__(self):
         '''
         表示一个产生式的字符串

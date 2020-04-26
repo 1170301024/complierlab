@@ -294,23 +294,24 @@ class Parser:
         self.table(self.cfg)
         t2 = datetime.now()
         print("求闭包花费的时间为：" + str(t2-t1))
-        k = 0
-        for i in self.item_family:
-            print('S%d:' %k)
-            k+=1
-            if k > 1000:
-                break
-            for item in i:
-                print(item)
+        # k = 0
+        # for i in self.item_family:
+        #     print('S%d:' %k)
+        #     k+=1
+        #     if k > 1000:
+        #         break
+        #     for item in i:
+        #         print(item)
         # 初始化时将0状态放入状态栈中
         state_stack = [0,]
         node_stack = []
+        attr_stack = []
         # look为将下一个token变成的终结符
         look = None
         move()
         while True:
-            print(look)
-            print(state_stack)
+            # print(look)
+            # print(state_stack)
             state_actions =  self.actions[state_stack[-1]]
             error_flag1 = True
             for action in state_actions:
@@ -327,7 +328,9 @@ class Parser:
                     # 移入操作
                     elif action[1] == 0:
                         state_stack.append(action[2])
-                        node_stack.append(Node(look, self.lexer.row))
+                        node = Node(look, self.lexer.row)
+                        node_stack.append(node)
+                        attr_stack.append({'lexeme':look.show_str})
                         move()
                         break
                     # 规约操作
@@ -336,10 +339,14 @@ class Parser:
                         num_of_s = production.get_num_body_smybol()
                         r_node = Node(production.header)
                         r_row = self.lexer.row
+
+                        production.semantic_rule(attr_stack, len(attr_stack) - 1)
                         for i in range(num_of_s):
                             state_stack.pop()
                             r_row = node_stack[-1].lex_line
                             r_node.add_subnode(node_stack.pop())
+                            if i > 0:
+                                attr_stack.pop()
                         r_node.lex_line = r_row
                         goto_action = self.gotos[state_stack[-1]]
                         error_flag = True
