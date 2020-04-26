@@ -224,11 +224,24 @@ class Rules:
         stack[top-2]['type'] = stack[top]['type']
         top -= 2
 
+    #语句和块
+    def block_item_list(self, stack, top):
+        self.functions.backpatch(stack[top - 2]['nextlist'], stack[top-1]['quad'])
+        stack[top-2]['nextlist'] = stack[top]['nextlist']
+
+    def block_M(self, stack, top):
+        stack[top+1]['quad'] = self.functions.nextquad()
     # selection statements
     def selection_statement_rule_1(self, stack, top):
-        stack[top - 5]['nextlist'] = self.functions.merge(stack[top - 3]['falselist'], stack[top]['nextlist'])
+        stack[top - 6]['nextlist'] = self.functions.merge(stack[top - 3]['falselist'], stack[top]['nextlist'])
         self.functions.backpatch(stack[top - 3]['falselist'], stack[top - 1]['quad'])
-        top -= 5
+        top -= 6
+
+    def goto_M(self, stack, top):
+        stack[top+1]['truelist'] = self.functions.makelist(self.functions.nextquad())
+        stack[top+1]['falselist'] = self.functions.makelist(self.functions.nextquad()+1)
+        self.functions.gen('jne', stack[top]['addr'], 0, 'goto_')
+        self.functions.gen('goto_')
     def M_1(self, stack, top):
         stack[top+1]['quad'] = self.functions.nextquad()
 
@@ -238,7 +251,7 @@ class Rules:
                                                                                stack[top-3]['nextlist']),stack[top]['nextlist'])
         self.functions.backpatch(stack[top - 7]['truelist'], stack[top - 5]['quad'])
         self.functions.backpatch(stack[top - 7]['falselist'], stack[top - 1]['quad'])
-        top -= 9
+        top -= 10
 
     def N_1(self, stack, top):
         stack[top+1]['nextlist'] = self.functions.makelist(self.functions.nextquad())
@@ -247,10 +260,10 @@ class Rules:
     # iteration statements
     def iteration_statement_rule_1(self, stack, top):
         stack[top - 7]['nextlist'] = stack[top-3]['falselist']
-        self.functions.backpatch(stack[top]['nextlist'], stack[top-5]['quad'])
+        self.functions.backpatch(stack[top]['nextlist'], stack[top-6]['quad'])
         self.functions.backpatch(stack[top-3]['nextlist'], stack[top - 1]['quad'])
         self.functions.gen('goto', result=stack[top-5]['quad'])
-        top -= 6
+        top -= 7
 
     # 声明
     def declaration_1(self, stack, top):
@@ -296,6 +309,9 @@ class Rules:
     def basic_4(self, stack, top):
         stack[top]['type'] = Type('double', 8)
 
+    def basic_5(self, stack, top):
+        stack[top]['type'] = Type('char', 1)
+
     def C_1(self, stack, top):
         stack[top+1]['type'] = self.t
 
@@ -305,4 +321,32 @@ class Rules:
 
 
 
+    # 函数定义
 
+    # 常量
+    def constant_rule_1(self, stack, top):
+        stack[top]['type'] = Type('int', 4)
+        stack[top]['val'] = stack[top]['val']
+
+    def constant_rule_2(self, stack, top):
+        stack[top]['type'] = Type('float', 4)
+        stack[top]['val'] = stack[top]['val']
+
+    def constant_rule_3(self, stack, top):
+        stack[top]['type'] = Type('char', 1)
+        stack[top]['val'] = stack[top]['val']
+
+    def integer_constant_rule_1(self, stack, top):
+        stack[top]['val'] = stack[top]['lexeme']
+
+    def integer_constant_rule_2(self, stack, top):
+        stack[top]['val'] = stack[top]['lexeme']
+
+    def integer_constant_rule_3(self, stack, top):
+        stack[top]['val'] = stack[top]['lexeme']
+
+    def floating_constant_rule(self, stack, top):
+        stack[top]['val'] = stack[top]['lexeme']
+
+    def character_constant_rule(self, stack, top):
+        stack[top]['val'] = stack[top]['lexeme']

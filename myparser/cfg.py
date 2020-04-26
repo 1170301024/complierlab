@@ -523,7 +523,10 @@ class Cfg:
         reserve(Nonterminal('block-item-list'),
                 [Nonterminal('block-item')])
         reserve(Nonterminal('block-item-list'),
-                [Nonterminal('block-item-list'),Nonterminal('block-item')])
+                [Nonterminal('block-item-list'),Nonterminal('block_M'), Nonterminal('block-item')])
+
+        reserve(Nonterminal('block_M'), [Empty()])
+
         reserve(Nonterminal('block-item'),
                 [Nonterminal('declaration')])
         reserve(Nonterminal('block-item'),
@@ -539,10 +542,13 @@ class Cfg:
         # selection-statement -> IF(expression) statement else statement
         # selection-statement -> switch(expression) statement
         reserve(Nonterminal('selection-statement'),
-                [Terminal(Tag.IF, 'IF'),Terminal(Tag.SLP, '('),Nonterminal('expression'), Terminal(Tag.SRP, ')'),Nonterminal('statement')])
+                [Terminal(Tag.IF, 'IF'),Terminal(Tag.SLP, '('),Nonterminal('expression'), Nonterminal('goto_M'), Terminal(Tag.SRP, ')'), Nonterminal('M'), Nonterminal('statement')])
+        reserve(Nonterminal('goto_M'), [Empty()])
+        reserve(Nonterminal('M'), [Empty])
         reserve(Nonterminal('selection-statement'),
-                [Terminal(Tag.IF, 'IF'), Terminal(Tag.SLP, '('), Nonterminal('expression'), Terminal(Tag.SRP, ')'),
-                 Nonterminal('statement'),Terminal(Tag.ELSE, 'ELSE'),Nonterminal('statement')])
+                [Terminal(Tag.IF, 'IF'), Terminal(Tag.SLP, '('), Nonterminal('expression'), Nonterminal('goto_M'), Terminal(Tag.SRP, ')'),
+                 Nonterminal('M'), Nonterminal('statement'), Nonterminal('N'),Terminal(Tag.ELSE, 'ELSE'),Nonterminal('statement')])
+        reserve(Nonterminal('N'), [Empty()])
         reserve(Nonterminal('selection-statement'),
                 [Terminal(Tag.SWITCH, 'SWITCH'), Terminal(Tag.SLP, '('), Nonterminal('expression'), Terminal(Tag.SRP, ')'),
                  Nonterminal('statement')])
@@ -554,7 +560,7 @@ class Cfg:
         # iteration-statement -> for ( declaration expressionopt; expressionopt ) statement
         reserve(Nonterminal('iteration-statement'),
                 [Terminal(Tag.WHILE, 'WHILE'), Terminal(Tag.SLP, '('), Nonterminal('expression'),
-                 Terminal(Tag.SRP, ')'),Nonterminal('statement')])
+                 Nonterminal('goto_M'), Terminal(Tag.SRP, ')'), Nonterminal('M'), Nonterminal('statement')])
         reserve(Nonterminal('iteration-statement'),
                 [Terminal(Tag.DO,'DO'),Nonterminal('statement'),Terminal(Tag.WHILE, 'WHILE'), Terminal(Tag.SLP, '('), Nonterminal('expression'),
                  Terminal(Tag.SRP, ')'), Terminal(Tag.SEMI,';')])
@@ -582,22 +588,38 @@ class Cfg:
                 [Terminal(Tag.RETURN, 'RETURN'),Nonterminal('expressionopt'), Terminal(Tag.SEMI,';')])
 
         # 5.定义
-        # function-definition -> declaration-specifiers declarator declaration-listopt compound-statement
-        # declaration-list -> declaration
-        # declaration-list -> declaration-list declaration
-        reserve(Nonterminal('function-definition'),
-                [Nonterminal('declaration-specifiers'),Nonterminal('declarator'),Nonterminal('declaration-listopt'),Nonterminal('compound-statement')])
-        reserve(Nonterminal('declaration-list'),
-                [Nonterminal('declaration')])
-        reserve(Nonterminal('declaration-list'),
-                [Nonterminal('declaration-list'),Nonterminal('declaration')])
-        reserve(Nonterminal('declaration-listopt'),
-                [Nonterminal('declaration-list')])
-        reserve(Nonterminal('declaration-listopt'),
-                [Empty()])
+        # # function-definition -> declaration-specifiers declarator declaration-listopt compound-statement
+        # # declaration-list -> declaration
+        # # declaration-list -> declaration-list declaration
+        # reserve(Nonterminal('function-definition'),
+        #         [Nonterminal('declaration-specifiers'),Nonterminal('declarator'),Nonterminal('declaration-listopt'),Nonterminal('compound-statement')])
+        # reserve(Nonterminal('declaration-list'),
+        #         [Nonterminal('declaration')])
+        # reserve(Nonterminal('declaration-list'),
+        #         [Nonterminal('declaration-list'),Nonterminal('declaration')])
+        # reserve(Nonterminal('declaration-listopt'),
+        #         [Nonterminal('declaration-list')])
+        # reserve(Nonterminal('declaration-listopt'),
+        #         [Empty()])
 
         # 6.常量
         # constant -> integer-constant | floating-constant | character-constant
+        # 5函数定义
+        # function-definition -> type ID ( args-listopt ) compound-statement
+        # args-listopt -> args-list | e
+        # args-list -> args
+        # args-list -> args-list , args
+        # args -> type ID
+        reserve(Nonterminal('function-definition'), [Nonterminal('type'), Terminal(Tag.ID, 'id'),
+                                                     Terminal(Tag.SLP, '('), Nonterminal('args-listopt'),
+                                                     Terminal(Tag.SRP, ')'), Nonterminal('compound-statement')])
+        reserve(Nonterminal('args-listopt'), [Nonterminal('args-list')])
+        reserve(Nonterminal('args-listopt'), [Empty()])
+        reserve(Nonterminal('args-list'), [Nonterminal('args')])
+        reserve(Nonterminal('args-listo'), [Nonterminal('args-list'), Terminal(Tag.COM, ','), Nonterminal('args')])
+        reserve(Nonterminal('args'), [Nonterminal('type'), Terminal(Tag.ID, 'id')])
+
+        # 常量
         reserve(Nonterminal('constant'), [Nonterminal('integer-constant')])
         reserve(Nonterminal('constant'), [Nonterminal('floating-constant')])
         reserve(Nonterminal('constant'), [Nonterminal('character-constant')])
