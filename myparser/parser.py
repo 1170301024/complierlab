@@ -310,7 +310,8 @@ class Parser:
         look = None
         move()
         while True:
-            # print(look)
+            print(attr_stack)
+            print(look)
             # print(state_stack)
             state_actions =  self.actions[state_stack[-1]]
             error_flag1 = True
@@ -340,7 +341,8 @@ class Parser:
                         r_node = Node(production.header)
                         r_row = self.lexer.row
 
-                        production.semantic_rule(attr_stack, len(attr_stack) - 1)
+                        if production.semantic_rule != None:
+                            production.semantic_rule(attr_stack, len(attr_stack) - 1)
                         for i in range(num_of_s):
                             state_stack.pop()
                             r_row = node_stack[-1].lex_line

@@ -1,4 +1,4 @@
-from myparser.type import Symbols_Table
+from myparser.type import Symbols_Table, Symbol_Table_Entry
 
 
 class Functions:
@@ -69,7 +69,8 @@ class Functions:
         pass
 
     def enter(self, name, type):
-        pass
+        entry = Symbol_Table_Entry(name,type,0)
+        self.symbol_table.add_symbol_entry(entry)
 
     # 类型转换
     def type_conversion(self, type1, type2):

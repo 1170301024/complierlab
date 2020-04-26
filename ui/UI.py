@@ -537,7 +537,45 @@ class UI:
             pass
 
         def semanticsAnalysis():
-            pass
+            # 初始化窗口
+            window = Tk()
+            window.title('语义分析')
+            window.geometry('600x600')
+            window.resizable(0, 0)
+
+            if self.lexer.program == None:
+                tkinter.messagebox.showinfo('提示', '未读取分析文件')
+                return
+            if self.parser == None:
+                # self.lexer.program = "int m;z=0x12;m = 2+3*4;c= 'a';double b;int[2][4] h;int[3] a;a[0] = 2;while(m>2) {if(m<8)m = m +1;else m = m*2;}"
+                self.lexer.initDFA("../lexer/dfa_table")
+                self.parser = Parser(self.lexer)
+                self.parser.program()
+            self.lexer.program = self.content.get('0.0', 'end')
+            self.contentList = self.content.get("0.0", "end").split("\n")
+            self.contentList.pop()  # 列表最后一个元素是空删除它
+
+            frame = Frame(window)
+            frame.pack(side=LEFT, anchor=N, expand=True, fill=BOTH)
+            # 滚动条
+            scY = Scrollbar(frame, command=VERTICAL)
+            scX = Scrollbar(frame, orient=HORIZONTAL)
+            scY.pack(side=RIGHT, fill=Y)
+            scX.pack(side=BOTTOM, fill=X)
+
+            # 三地址码
+            three_addr_code = Text(frame, width=80, yscrollcommand=scY.set, xscrollcommand=scX.set)
+            three_addr_code.pack(side=LEFT, expand=True, fill=BOTH)
+
+            codes = self.parser.cfg.rules.functions.instructions
+            tag = 100
+            for code in codes:
+                three_addr_code.insert(tkinter.END,
+                                       '\n' + str(tag) + ' : (' + code[0] + ' ,' + code[1] + ' ,' + code[2] + ' ,' +
+                                       code[3] + ')')
+                tag += 1
+            three_addr_code.insert(tkinter.END,
+                                   '\n' + str(tag) + ' : ')
 
         def projectDir():
             '''
@@ -592,7 +630,6 @@ class UI:
                 tree.delete(item)
 
         def init_window():
-
 
             lineframe = Frame(contentframe, bg='white')
             test = Frame(contentframe)

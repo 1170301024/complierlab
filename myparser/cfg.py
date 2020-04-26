@@ -21,9 +21,9 @@ class Cfg:
         self.R = {}
         # 开始符号
         self.S = Nonterminal("G'")
+        self.rules = Rules()
         self.grammer()
 
-        self.rules = Rules()
     def grammer(self):
         def reserve(header, body, rule=None) :
             if header not in self.R.keys():
@@ -472,7 +472,7 @@ class Cfg:
 
         # 3.声明
         # D -> T id ;
-        # T -> B C
+        # T -> B M C
         # T -> T *
         # B -> int | real
         # C -> e
@@ -948,7 +948,7 @@ class Production:
     产生式
     header -> body
     '''
-    def __init__(self, header, body, semantic_rule):
+    def __init__(self, header, body, semantic_rule=None):
         self.header = header
         self.body = body
         self.semantic_rule = semantic_rule
