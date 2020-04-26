@@ -493,6 +493,9 @@ class UI:
                 self.lexer.initDFA("../lexer/dfa_table")
                 self.parser = Parser(self.lexer)
                 self.parser.program()
+            self.lexer.program = self.content.get('0.0', 'end')
+            self.contentList = self.content.get("0.0", "end").split("\n")
+            self.contentList.pop()  # 列表最后一个元素是空删除它
             nodes = [self.parser.root_node]
             items = []
 

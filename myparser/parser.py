@@ -294,7 +294,14 @@ class Parser:
         self.table(self.cfg)
         t2 = datetime.now()
         print("求闭包花费的时间为：" + str(t2-t1))
-
+        k = 0
+        for i in self.item_family:
+            print('S%d:' %k)
+            k+=1
+            if k > 1000:
+                break
+            for item in i:
+                print(item)
         # 初始化时将0状态放入状态栈中
         state_stack = [0,]
         node_stack = []
@@ -302,8 +309,8 @@ class Parser:
         look = None
         move()
         while True:
-            # print(look)
-            # print(state_stack)
+            print(look)
+            print(state_stack)
             state_actions =  self.actions[state_stack[-1]]
             error_flag1 = True
             for action in state_actions:

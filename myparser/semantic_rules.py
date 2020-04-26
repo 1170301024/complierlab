@@ -3,7 +3,7 @@ from myparser.functions import *
 #    $   A    |   B   |   C   |   D  <- LR stack
 #      addr :v|                      <- 属性
 # #    type :t|
-from myparser.type import Type, Array, Pointer, struct
+from myparser.type import Type, Array, Pointer, Struct, Function
 
 
 class Rules:
@@ -225,12 +225,39 @@ class Rules:
         top -= 2
 
     #语句和块
-    def block_item_list(self, stack, top):
-        self.functions.backpatch(stack[top - 2]['nextlist'], stack[top-1]['quad'])
-        stack[top-2]['nextlist'] = stack[top]['nextlist']
+    def statement(self, stack, top):
+        stack[top]['nextlist'] = stack[top]['nextlist']
 
-    def block_M(self, stack, top):
-        stack[top+1]['quad'] = self.functions.nextquad()
+    # compound statements
+    def compound_statement_1(self, stack, top):
+        stack[top-2]['nextlist'] = stack[top-1]['nextlist']
+        top -= 2
+
+    def block_item_listopt_1(self, stack, top):
+        stack[top]['nextlist'] = stack[top]['nextlist']
+
+    def block_item_listopt_2(self, stack, top):
+        stack[top]['nextlist'] = []
+
+    def block_item_list_1(self, stack, top):
+        stack[top]['nextlist'] = stack[top]['nextlist']
+
+    def block_item_list_2(self, stack, top):
+        self.functions.backpatch(stack[top - 1]['nextlist'], self.functions.nextquad())
+        stack[top - 1]['nextlist'] = stack[top]['nextlist']
+        top -= 1
+
+    def block_item_1(self, stack, top):
+        stack[top]['nextlist'] = []
+
+    def block_item_2(self, stack, top):
+        stack[top]['nextlist'] = stack[top]['nextlist']
+
+    # expression and null statements
+    def expression_statement_1(self, stack, top):
+        stack[top-1]['nextlist'] = []
+
+
     # selection statements
     def selection_statement_rule_1(self, stack, top):
         stack[top - 6]['nextlist'] = self.functions.merge(stack[top - 3]['falselist'], stack[top]['nextlist'])
@@ -282,7 +309,7 @@ class Rules:
         top -= 2
 
     def type_3(self, stack, top):
-        stack[top-3]['type'] = struct('struct',self.temp_field)
+        stack[top-3]['type'] = Struct('struct', self.temp_field)
         top -= 3
 
     def struct_declaration_list_1(self, stack, top):
@@ -319,9 +346,25 @@ class Rules:
         stack[top-3]['type'] = Array('array',stack[top-2]['addr'],stack[top]['type'])
         top -= 3
 
-
-
     # 函数定义
+    def function_definition(self, stack, top):
+        stack[top-5]['type'] = Function('function',stack[top-4]['lexeme'],stack[top-5]['type'],self.args_list)
+        self.functions.backpatch(stack[top]['nextlist'], self.functions.nextquad())
+        top -= 5
+
+    def args_listopt(self, stack, top):
+        self.args_list = []
+
+    def args_list_1(self, stack, top):
+        self.args_list = []
+        self.args_list.append((stack[top]['type'],stack[top]['id']))
+
+    def args_list_2(self, stack, top):
+        self.args_list.append((stack[top]['type'], stack[top]['id']))
+
+    def args_1(self, stack, top):
+        stack[top-1]['type'] = stack[top-1]['type']
+        stack[top-1]['id'] = stack[top]['lexeme']
 
     # 常量
     def constant_rule_1(self, stack, top):

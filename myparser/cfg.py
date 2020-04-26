@@ -165,18 +165,18 @@ class Cfg:
         # 条件操作符
         # conditional-expression -> logical-OR-expression
         # conditional-expression -> logical-OR-expression ? expression: conditional-expression
-        reserve(Nonterminal('conditional-expression'),
-                [Nonterminal('logical-OR-expression')])
-        reserve(Nonterminal('conditional-expression'),
-                [Nonterminal('logical-OR-expression'), Terminal(Tag.QM, '?'),
-                 Nonterminal('expression'),Terminal(Tag.COL, ':'),Nonterminal('conditional-expression')])
+        # reserve(Nonterminal('conditional-expression'),
+        #         [Nonterminal('logical-OR-expression')])
+        # reserve(Nonterminal('conditional-expression'),
+        #         [Nonterminal('logical-OR-expression'), Terminal(Tag.QM, '?'),
+        #          Nonterminal('expression'),Terminal(Tag.COL, ':'),Nonterminal('conditional-expression')])
 
         # 赋值操作符
         # assignment-expression -> conditional-expression
         # assignment-expression -> unary-expression assignment-operator assignment-expression
         # assignment-operator -> = | *= | /= | %= | += | -= | <<= | >>= | &= | ^= | |=
         reserve(Nonterminal('assignment-expression'),
-                [Nonterminal('conditional-expression')])
+                [Nonterminal('logical-OR-expression')])
         reserve(Nonterminal('assignment-expression'),
                 [Nonterminal('assignment-expression'),Nonterminal('assignment-operator'),Nonterminal('assignment-expression')])
         for i in [[Terminal(Tag.ASSIGN,'=')],
@@ -453,7 +453,7 @@ class Cfg:
         # 3.声明
         # D -> T id ;
         # T -> B C
-        # T -> * T
+        # T -> T *
         # B -> int | real
         # C -> e
         # C -> [ num ] C
@@ -462,7 +462,7 @@ class Cfg:
         reserve(Nonterminal('type'),
                 [Nonterminal('basic'), Nonterminal('C')])
         reserve(Nonterminal('type'),
-                [Terminal(Tag.MUILT,'*'), Nonterminal('type')])
+                [Nonterminal('type'), Terminal(Tag.MUILT,'*')])
         reserve(Nonterminal('basic'),
                 [Terminal(Tag.INT, 'INT')])
         reserve(Nonterminal('basic'),
@@ -474,7 +474,7 @@ class Cfg:
         reserve(Nonterminal('C'),
                 [Empty()])
         reserve(Nonterminal('C'),
-                [Terminal(Tag.LRP,'['),Nonterminal('constant-expression'),Terminal(Tag.RRP,']'),Nonterminal('C')])
+                [Terminal(Tag.LRP,'['),Nonterminal('constant'),Terminal(Tag.RRP,']'),Nonterminal('C')])
 
         # 结构体
         reserve(Nonterminal('type'),
@@ -523,9 +523,7 @@ class Cfg:
         reserve(Nonterminal('block-item-list'),
                 [Nonterminal('block-item')])
         reserve(Nonterminal('block-item-list'),
-                [Nonterminal('block-item-list'),Nonterminal('block_M'), Nonterminal('block-item')])
-
-        reserve(Nonterminal('block_M'), [Empty()])
+                [Nonterminal('block-item-list'),Nonterminal('block-item')])
 
         reserve(Nonterminal('block-item'),
                 [Nonterminal('declaration')])
@@ -544,7 +542,7 @@ class Cfg:
         reserve(Nonterminal('selection-statement'),
                 [Terminal(Tag.IF, 'IF'),Terminal(Tag.SLP, '('),Nonterminal('expression'), Nonterminal('goto_M'), Terminal(Tag.SRP, ')'), Nonterminal('M'), Nonterminal('statement')])
         reserve(Nonterminal('goto_M'), [Empty()])
-        reserve(Nonterminal('M'), [Empty])
+        reserve(Nonterminal('M'), [Empty()])
         reserve(Nonterminal('selection-statement'),
                 [Terminal(Tag.IF, 'IF'), Terminal(Tag.SLP, '('), Nonterminal('expression'), Nonterminal('goto_M'), Terminal(Tag.SRP, ')'),
                  Nonterminal('M'), Nonterminal('statement'), Nonterminal('N'),Terminal(Tag.ELSE, 'ELSE'),Nonterminal('statement')])
@@ -616,7 +614,7 @@ class Cfg:
         reserve(Nonterminal('args-listopt'), [Nonterminal('args-list')])
         reserve(Nonterminal('args-listopt'), [Empty()])
         reserve(Nonterminal('args-list'), [Nonterminal('args')])
-        reserve(Nonterminal('args-listo'), [Nonterminal('args-list'), Terminal(Tag.COM, ','), Nonterminal('args')])
+        reserve(Nonterminal('args-list'), [Nonterminal('args-list'), Terminal(Tag.COM, ','), Nonterminal('args')])
         reserve(Nonterminal('args'), [Nonterminal('type'), Terminal(Tag.ID, 'id')])
 
         # 常量

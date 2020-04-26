@@ -1,35 +1,20 @@
 struct {
-    int *pointer;
-    long * nextpointer;
+    int *p;
+    double f;
 }item;
-int getSum(int x,int y);
 int main(){
-    int x = y>0 ? 1 : 2 || 3 && 3>4+2*-z[0];
-    int x += int y;  /* error */
-    int h[2][4] = {0};
-    int a [3];
+    int x;
+    int y;  /* error */
+    int[2][4] h;
     a[0] = 2;
-    while(m>2)
-        if(m<8) {
-            m += 1;
-            a[1] = 0x12;
-        }
-        else
-            m = m*2;
-    for (int j = 1;j<5;j = j+1) {
-        printf(1);
+    while(m>2){
+        if(x>2)
+            x = x + 1;
+        int z;
     }
-	getSum(1 2);    /*error*/
+    getSum(1,2);    /*error*/
 }
-int getSum(int x, int y){
-    struct item item1;
-    label:
-    switch(x) {
-        case 1:
-            break;
-        case 2+03:
-            goto label;
-        default:
-            ;
-    }
-}
+int x;
+
+
+

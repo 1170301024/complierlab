@@ -54,7 +54,7 @@ class Array(Type):
         '''
         return self.stype
 
-class struct(Type):
+class Struct(Type):
     def __init__(self, type_str, field_list):
         '''
 
@@ -76,14 +76,14 @@ class struct(Type):
         return self.fields[field_name]
 
 
-class function(Type):
+class Function(Type):
     def __init__(self, type_str, name, result_type, params_list):
         '''
 
         :param type_str:
         :param name:
         :param result_type:
-        :param params_list:
+        :param params_list: [(type,id)]
         '''
         super().__init__(type_str, width=0)
         self.identify = name
