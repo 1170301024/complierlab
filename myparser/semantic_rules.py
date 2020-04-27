@@ -24,7 +24,7 @@ class Rules:
         stack[top]['type'] = self.functions.lookup(stack[top]['lexeme']).get_type()
 
     def primary_expression_rule_2(self, stack, top):
-        stack[top]['addr'] = self.functions.newtemp()
+
         stack[top]['addr'] = stack[top]['val']
         stack[top]['type'] = stack[top]['type']
 
@@ -56,7 +56,7 @@ class Rules:
                 self.functions.gen('param',r_args[0])
             else:
                 raise None # 参数类型不匹配
-        self.functions.gen('call', temp_addr, len(self.temp_argument), stack[top-3]['addr'])
+        self.functions.gen('call', temp_addr, len(self.temp_argument))
         stack[top-3]['type'] = stack[top-3]['type'].get_result_type()
         top -= 3
 
@@ -327,9 +327,9 @@ class Rules:
 
     # 函数定义
     def function_definition(self, stack, top):
-        stack[top-5]['type'] = Function('function',stack[top-4]['lexeme'],stack[top-5]['type'],self.args_list)
+        stack[top-6]['type'] = Function('function',stack[top-5]['lexeme'],stack[top-6]['type'],self.args_list)
         self.functions.backpatch(stack[top]['nextlist'], self.functions.nextquad())
-        self.functions.enter(stack[top-4]['lexeme'],stack[top-5]['type'])
+        self.functions.enter(stack[top-5]['lexeme'],stack[top-6]['type'])
 
     def args_listopt(self, stack, top):
         stack.append({})
@@ -346,6 +346,9 @@ class Rules:
         stack[top-1]['type'] = stack[top-1]['type']
         stack[top-1]['id'] = stack[top]['lexeme']
 
+    def label_M(self, stack, top):
+        stack.append({})
+        self.functions.newlabel(stack[top-3]['lexeme'])
     # 常量
     def constant_rule_1(self, stack, top):
         stack[top]['type'] = Type('int', 4)

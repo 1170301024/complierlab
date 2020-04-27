@@ -649,14 +649,14 @@ class Cfg:
         # 6.常量
         # constant -> integer-constant | floating-constant | character-constant
         # 5函数定义
-        # function-definition -> type ID ( args-listopt ) compound-statement
+        # function-definition -> type ID ( args-listopt ) label_M compound-statement
         # args-listopt -> args-list | e
         # args-list -> args
         # args-list -> args-list , args
         # args -> type ID
         reserve(Nonterminal('function-definition'), [Nonterminal('type'), Terminal(Tag.ID, 'id'),
                                                      Terminal(Tag.SLP, '('), Nonterminal('args-listopt'),
-                                                     Terminal(Tag.SRP, ')'), Nonterminal('compound-statement')],
+                                                     Terminal(Tag.SRP, ')'), Nonterminal('label_M'), Nonterminal('compound-statement')],
                 self.rules.function_definition)
         reserve(Nonterminal('args-listopt'), [Nonterminal('args-list')])
         reserve(Nonterminal('args-listopt'), [Empty()],
@@ -667,6 +667,7 @@ class Cfg:
                 self.rules.args_list_2)
         reserve(Nonterminal('args'), [Nonterminal('type'), Terminal(Tag.ID, 'id')],
                 self.rules.args_1)
+        reserve(Nonterminal('label_M'), [Empty()], self.rules.label_M)
 
         # 常量
         reserve(Nonterminal('constant'), [Nonterminal('integer-constant')],

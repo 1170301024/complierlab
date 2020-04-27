@@ -9,7 +9,10 @@ class Functions:
         self.temp_label = 1
         self.instructions = []
         self.symbol_table = Symbols_Table()
-        self.i = 0
+
+        # label和label所在的指令索引
+        self.label_dict = {}
+        self.label_name_index = 0
 
     # 回填相关
     def makelist(self, i):
@@ -42,7 +45,6 @@ class Functions:
 
         for i in list:
             inst = self.instructions[i]
-            print(inst)
             if inst[0] == 'goto_':
                 self.instructions[i] = ('goto', '_', '_', quad)
             elif inst[3] == 'goto_':
@@ -62,6 +64,14 @@ class Functions:
         inst = (op, arg1, arg2, result)
         self.instructions.append(inst)
         self.quad += 1
+
+    def newlabel(self, label_name=None):
+        if label_name is not None:
+            self.label_dict[label_name] = self.nextquad()
+        else:
+            label_name = 'L' + str(self.label_name_index)
+            self.label_dict[label_name] = self.nextquad()
+
 
     # 符号表相关的
     def lookup(self, name):
@@ -91,7 +101,6 @@ class Functions:
 
 
     def enter(self, name, type):
-        self.i += 1
         entry = Symbol_Table_Entry(name, type, 0)
         self.symbol_table.add_symbol_entry(entry)
 
