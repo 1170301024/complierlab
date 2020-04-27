@@ -216,9 +216,9 @@ class Cfg:
                 [Nonterminal('expression'),Terminal(Tag.COM,','),Nonterminal('assignment-expression')],
                 self.rules.expression_2)
         reserve(Nonterminal('expressionopt'),
-                [Nonterminal('expression')])
+                [Nonterminal('expression')],self.rules.expressionopt_1)
         reserve(Nonterminal('expressionopt'),
-                [Empty()])
+                [Empty()],self.rules.expressionopt_2)
 
         # 2.常量表达式
         # constant-expression -> conditional-expression
@@ -534,7 +534,8 @@ class Cfg:
                 self.rules.statement)
         reserve(Nonterminal('statement'), [Nonterminal('iteration-statement')],
                 self.rules.statement)
-        reserve(Nonterminal('statement'), [Nonterminal('jump-statement')])
+        reserve(Nonterminal('statement'), [Nonterminal('jump-statement')]
+                ,self.rules.statement)
 
         # labeled statements
         # labeled-statement -> ID : statement
@@ -589,7 +590,7 @@ class Cfg:
         reserve(Nonterminal('M'), [Empty()], self.rules.M_1)
         reserve(Nonterminal('selection-statement'),
                 [Terminal(Tag.IF, 'IF'), Terminal(Tag.SLP, '('), Nonterminal('expression'), Nonterminal('goto_M'), Terminal(Tag.SRP, ')'),
-                 Nonterminal('M'), Nonterminal('statement'), Nonterminal('N'),Terminal(Tag.ELSE, 'ELSE'),Nonterminal('statement')],
+                 Nonterminal('M'), Nonterminal('statement'), Nonterminal('N'),Terminal(Tag.ELSE, 'ELSE'), Nonterminal('M'),Nonterminal('statement')],
                 self.rules.selection_statement_rule_2)
         reserve(Nonterminal('N'), [Empty()], self.rules.N_1)
         reserve(Nonterminal('selection-statement'),
@@ -629,7 +630,8 @@ class Cfg:
         reserve(Nonterminal('jump-statement'),
                 [Terminal(Tag.BREAK, 'BREAK'), Terminal(Tag.SEMI,';')])
         reserve(Nonterminal('jump-statement'),
-                [Terminal(Tag.RETURN, 'RETURN'),Nonterminal('expressionopt'), Terminal(Tag.SEMI,';')])
+                [Terminal(Tag.RETURN, 'RETURN'),Nonterminal('expressionopt'), Terminal(Tag.SEMI,';')],
+                self.rules.jump_statement)
 
         # 5.定义
         # # function-definition -> declaration-specifiers declarator declaration-listopt compound-statement

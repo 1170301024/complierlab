@@ -45,6 +45,9 @@ class Functions:
         # call p, n
         elif triple[0] == 'call':
             return 'call %s, %s' % (triple[1], triple[2])
+
+        elif triple[0] == 'ret':
+            return 'ret %s' %triple[3]
         else:
             return str(triple) + '没有对应的三地址码'
 

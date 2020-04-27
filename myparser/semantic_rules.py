@@ -210,6 +210,14 @@ class Rules:
         stack[top-2]['addr'] = stack[top]['addr']
         stack[top-2]['type'] = stack[top]['type']
 
+    def expressionopt_1(self, stack, top):
+        stack[top]['addr'] = stack[top]['addr']
+        stack[top]['type'] = stack[top]['type']
+
+    def expressionopt_2(self, stack, top):
+        stack.append({})
+        stack[top+1]['addr'] = None
+
     #语句和块
     def statement(self, stack, top):
         stack[top]['nextlist'] = stack[top]['nextlist']
@@ -228,7 +236,7 @@ class Rules:
         stack[top]['nextlist'] = stack[top]['nextlist']
 
     def block_item_list_2(self, stack, top):
-        self.functions.backpatch(stack[top - 1]['nextlist'], self.functions.nextquad())
+        self.functions.backpatch(stack[top - 1]['nextlist'], self.functions.nextquad()-1)
         stack[top - 1]['nextlist'] = stack[top]['nextlist']
 
     def block_item_1(self, stack, top):
@@ -259,7 +267,7 @@ class Rules:
 
 
     def selection_statement_rule_2(self, stack, top):
-        stack[top - 9]['nextlist'] = self.functions.merge(self.functions.merge(stack[top - 4]['nextlist'],
+        stack[top - 10]['nextlist'] = self.functions.merge(self.functions.merge(stack[top - 4]['nextlist'],
                                                                                stack[top-3]['nextlist']),stack[top]['nextlist'])
         self.functions.backpatch(stack[top - 7]['truelist'], stack[top - 5]['quad'])
         self.functions.backpatch(stack[top - 7]['falselist'], stack[top - 1]['quad'])
@@ -328,7 +336,7 @@ class Rules:
     # 函数定义
     def function_definition(self, stack, top):
         stack[top-6]['type'] = Function('function',stack[top-5]['lexeme'],stack[top-6]['type'],self.args_list)
-        self.functions.backpatch(stack[top]['nextlist'], self.functions.nextquad())
+        # self.functions.backpatch(stack[top]['nextlist'], self.functions.nextquad())
         self.functions.enter(stack[top-5]['lexeme'],stack[top-6]['type'])
 
     def args_listopt(self, stack, top):
@@ -349,6 +357,11 @@ class Rules:
     def label_M(self, stack, top):
         stack.append({})
         self.functions.newlabel(stack[top-3]['lexeme'])
+
+    def jump_statement(self, stack, top):
+        stack[top-2]['nextlist'] = []
+        self.functions.gen('ret',result=stack[top-1]['addr'])
+
     # 常量
     def constant_rule_1(self, stack, top):
         stack[top]['type'] = Type('int', 4)

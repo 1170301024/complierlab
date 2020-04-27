@@ -64,7 +64,7 @@ class Array(Type):
         return self.stype
 
     def __str__(self):
-        return 'array('+ str(self.stype) + ',' + str(self.num) + ')'
+        return 'array('+ str(self.num) + ',' + str(self.stype) + ')'
 
 class Struct(Type):
     def __init__(self, type_str, field_list):
