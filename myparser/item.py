@@ -58,6 +58,7 @@ class Item:
             return None
 
         new_item = copy.deepcopy(self)
+        new_item.production = self.production
         new_item.__loc += 1
         new_item.symbols = self.symbols[:]
         return new_item

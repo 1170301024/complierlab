@@ -1,4 +1,4 @@
-from myparser.type import Symbols_Table, Symbol_Table_Entry
+from myparser.type import Symbols_Table, Symbol_Table_Entry, Type
 
 
 class Functions:
@@ -64,9 +64,21 @@ class Functions:
         self.temp_label += 1
         return label
 
+    def max(self, type1, type2):
+        if not isinstance(type1, Type) or not isinstance(type2, Type):
+            raise TypeError
+        priority_list = [Type('double',8),Type('float',4),Type('int',4),Type('char',1)]
+        index_type1 = priority_list.index(type1)
+        index_type2 = priority_list.index(type2)
+        return priority_list[max(index_type1,index_type2)]
 
     def widen(self, addr, type1, type2):
-        pass
+        if not isinstance(type1, Type) or not isinstance(type2, Type):
+            raise TypeError
+        priority_list = [Type('double',8),Type('float',4),Type('int',4),Type('char',1)]
+        if type1 == priority_list[2] or type1 == priority_list[3]:
+            pass
+
 
     def enter(self, name, type):
         entry = Symbol_Table_Entry(name,type,0)

@@ -41,9 +41,15 @@ class Type:
         self.type_str = type_str
         self.width = width
 
+    def __eq__(self, other):
+        if not isinstance(other, Type):
+            raise TypeError
+        return self.type_str == other.type_str and self.width == self.width
+
+
 class Array(Type):
     def __init__(self, type_str, num, stype):
-        width = num * stype.width
+        width = int(num) * stype.width
         super().__init__(type_str, width)
         self.num = num
         self.stype = stype

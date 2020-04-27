@@ -24,7 +24,8 @@ class Rules:
         stack[top]['type'] = self.functions.lookup(stack[top]['lexeme']).get_type()
 
     def primary_expression_rule_2(self, stack, top):
-        stack[top]['addr'] = stack[top]['addr']
+        stack[top]['addr'] = self.functions.newtemp()
+        stack[top]['addr'] = stack[top]['val']
         stack[top]['type'] = stack[top]['type']
 
     def primary_expression_rule_3(self, stack, top):
@@ -106,7 +107,7 @@ class Rules:
     def multiplicative_expression_2(self, stack, top):
         temp_addr = stack[top-2]['addr']
         temp_type = stack[top-2]['type']
-        stack[top-2]['type'] = max(temp_type, stack[top]['type'])
+        stack[top-2]['type'] = self.functions.max(temp_type, stack[top]['type'])
         a = self.functions.widen(temp_addr, temp_type, stack[top-2]['type'])
         b = self.functions.widen(stack[top]['addr'], stack[top]['type'], stack[top-2]['type'])
         stack[top-2]['addr'] = self.functions.newtemp()
@@ -117,7 +118,7 @@ class Rules:
     def multiplicative_expression_3(self, stack, top):
         temp_addr = stack[top - 2]['addr']
         temp_type = stack[top - 2]['type']
-        stack[top - 2]['type'] = max(temp_type, stack[top]['type'])
+        stack[top - 2]['type'] = self.functions.max(temp_type, stack[top]['type'])
         a = self.functions.widen(temp_addr, temp_type, stack[top - 2]['type'])
         b = self.functions.widen(stack[top]['addr'], stack[top]['type'], stack[top - 2]['type'])
         stack[top - 2]['addr'] = self.functions.newtemp()
@@ -127,7 +128,7 @@ class Rules:
     def multiplicative_expression_4(self, stack, top):
         temp_addr = stack[top - 2]['addr']
         temp_type = stack[top - 2]['type']
-        stack[top - 2]['type'] = max(temp_type, stack[top]['type'])
+        stack[top - 2]['type'] = self.functions.max(temp_type, stack[top]['type'])
         a = self.functions.widen(temp_addr, temp_type, stack[top - 2]['type'])
         b = self.functions.widen(stack[top]['addr'], stack[top]['type'], stack[top - 2]['type'])
         stack[top - 2]['addr'] = self.functions.newtemp()
@@ -141,7 +142,7 @@ class Rules:
     def additive_expression_2(self, stack, top):
         temp_addr = stack[top - 2]['addr']
         temp_type = stack[top - 2]['type']
-        stack[top - 2]['type'] = max(temp_type, stack[top]['type'])
+        stack[top - 2]['type'] = self.functions.max(temp_type, stack[top]['type'])
         a = self.functions.widen(temp_addr, temp_type, stack[top - 2]['type'])
         b = self.functions.widen(stack[top]['addr'], stack[top]['type'], stack[top - 2]['type'])
         stack[top - 2]['addr'] = self.functions.newtemp()
@@ -151,7 +152,7 @@ class Rules:
     def additive_expression_3(self, stack, top):
         temp_addr = stack[top - 2]['addr']
         temp_type = stack[top - 2]['type']
-        stack[top - 2]['type'] = max(temp_type, stack[top]['type'])
+        stack[top - 2]['type'] = self.functions.max(temp_type, stack[top]['type'])
         a = self.functions.widen(temp_addr, temp_type, stack[top - 2]['type'])
         b = self.functions.widen(stack[top]['addr'], stack[top]['type'], stack[top - 2]['type'])
         stack[top - 2]['addr'] = self.functions.newtemp()
@@ -339,7 +340,7 @@ class Rules:
         stack[top+1]['type'] = self.t
 
     def C_2(self, stack, top):
-        stack[top-3]['type'] = Array('array',stack[top-2]['addr'],stack[top]['type'])
+        stack[top-3]['type'] = Array('array',stack[top-2]['val'],stack[top]['type'])
 
     # 函数定义
     def function_definition(self, stack, top):
