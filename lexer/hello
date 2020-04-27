@@ -6,7 +6,7 @@ int main(){
     int x;
     int y;  /* error */
     int[2][4] h;
-    h[0][3] = 2;
+    h[0][1] = 2;
     while(x>2){
         if(x>2)
             x = x + 1;

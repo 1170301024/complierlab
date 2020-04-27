@@ -13,6 +13,10 @@ class Rules:
 
     def __init__(self):
         self.functions = Functions()
+        self.temp_field = []
+        self.temp_argument = []
+        self.t = None
+        self.args_list = []
 
     # 基本表达式
     def primary_expression_rule_1(self, stack, top):
@@ -20,7 +24,8 @@ class Rules:
         stack[top]['type'] = self.functions.lookup(stack[top]['lexeme']).get_type()
 
     def primary_expression_rule_2(self, stack, top):
-        stack[top]['addr'] = stack[top]['addr']
+        stack[top]['addr'] = self.functions.newtemp()
+        stack[top]['addr'] = stack[top]['val']
         stack[top]['type'] = stack[top]['type']
 
     def primary_expression_rule_3(self, stack, top):
@@ -102,7 +107,7 @@ class Rules:
     def multiplicative_expression_2(self, stack, top):
         temp_addr = stack[top-2]['addr']
         temp_type = stack[top-2]['type']
-        stack[top-2]['type'] = max(temp_type, stack[top]['type'])
+        stack[top-2]['type'] = self.functions.max(temp_type, stack[top]['type'])
         a = self.functions.widen(temp_addr, temp_type, stack[top-2]['type'])
         b = self.functions.widen(stack[top]['addr'], stack[top]['type'], stack[top-2]['type'])
         stack[top-2]['addr'] = self.functions.newtemp()
@@ -113,7 +118,7 @@ class Rules:
     def multiplicative_expression_3(self, stack, top):
         temp_addr = stack[top - 2]['addr']
         temp_type = stack[top - 2]['type']
-        stack[top - 2]['type'] = max(temp_type, stack[top]['type'])
+        stack[top - 2]['type'] = self.functions.max(temp_type, stack[top]['type'])
         a = self.functions.widen(temp_addr, temp_type, stack[top - 2]['type'])
         b = self.functions.widen(stack[top]['addr'], stack[top]['type'], stack[top - 2]['type'])
         stack[top - 2]['addr'] = self.functions.newtemp()
@@ -123,7 +128,7 @@ class Rules:
     def multiplicative_expression_4(self, stack, top):
         temp_addr = stack[top - 2]['addr']
         temp_type = stack[top - 2]['type']
-        stack[top - 2]['type'] = max(temp_type, stack[top]['type'])
+        stack[top - 2]['type'] = self.functions.max(temp_type, stack[top]['type'])
         a = self.functions.widen(temp_addr, temp_type, stack[top - 2]['type'])
         b = self.functions.widen(stack[top]['addr'], stack[top]['type'], stack[top - 2]['type'])
         stack[top - 2]['addr'] = self.functions.newtemp()
@@ -137,7 +142,7 @@ class Rules:
     def additive_expression_2(self, stack, top):
         temp_addr = stack[top - 2]['addr']
         temp_type = stack[top - 2]['type']
-        stack[top - 2]['type'] = max(temp_type, stack[top]['type'])
+        stack[top - 2]['type'] = self.functions.max(temp_type, stack[top]['type'])
         a = self.functions.widen(temp_addr, temp_type, stack[top - 2]['type'])
         b = self.functions.widen(stack[top]['addr'], stack[top]['type'], stack[top - 2]['type'])
         stack[top - 2]['addr'] = self.functions.newtemp()
@@ -147,7 +152,7 @@ class Rules:
     def additive_expression_3(self, stack, top):
         temp_addr = stack[top - 2]['addr']
         temp_type = stack[top - 2]['type']
-        stack[top - 2]['type'] = max(temp_type, stack[top]['type'])
+        stack[top - 2]['type'] = self.functions.max(temp_type, stack[top]['type'])
         a = self.functions.widen(temp_addr, temp_type, stack[top - 2]['type'])
         b = self.functions.widen(stack[top]['addr'], stack[top]['type'], stack[top - 2]['type'])
         stack[top - 2]['addr'] = self.functions.newtemp()
@@ -162,10 +167,30 @@ class Rules:
     def relational_expression_2(self, stack, top):
         temp_addr = stack[top-2]['addr']
         stack[top-2]['addr'] = self.functions.newtemp()
-        self.functions.gen(stack[top-1]['lexeme'],temp_addr,stack[top]['addr'],stack[top-2]['addr'])
+        self.functions.gen('<',temp_addr,stack[top]['addr'],stack[top-2]['addr'])
         stack[top-2]['type'] = Type('int', 4)
         top -= 2
 
+    def relational_expression_3(self, stack, top):
+        temp_addr = stack[top-2]['addr']
+        stack[top-2]['addr'] = self.functions.newtemp()
+        self.functions.gen('>',temp_addr,stack[top]['addr'],stack[top-2]['addr'])
+        stack[top-2]['type'] = Type('int', 4)
+        top -= 2
+
+    def relational_expression_4(self, stack, top):
+        temp_addr = stack[top-2]['addr']
+        stack[top-2]['addr'] = self.functions.newtemp()
+        self.functions.gen('<=',temp_addr,stack[top]['addr'],stack[top-2]['addr'])
+        stack[top-2]['type'] = Type('int', 4)
+        top -= 2
+
+    def relational_expression_5(self, stack, top):
+        temp_addr = stack[top-2]['addr']
+        stack[top-2]['addr'] = self.functions.newtemp()
+        self.functions.gen('>=',temp_addr,stack[top]['addr'],stack[top-2]['addr'])
+        stack[top-2]['type'] = Type('int', 4)
+        top -= 2
 
     # 等价操作符文法没实现，逻辑与、或没写完
     def logical_AND_expression_1(self, stack, top):
@@ -176,7 +201,6 @@ class Rules:
         stack[top-2]['addr'] = self.functions.newtemp()
         '''需改正'''
 
-        top -= 2
 
     # 条件操作符
 
@@ -189,7 +213,6 @@ class Rules:
         self.functions.gen('=', stack[top]['addr'], result=stack[top-2]['addr'])
         stack[top]['addr'] = stack[top]['addr']
         stack[top]['type'] = stack[top]['type']
-        top -= 2
 
     # 赋值操作符
     def assignment_operator_1(self, stack, top):
@@ -203,7 +226,6 @@ class Rules:
     def expression_2(self, stack, top):
         stack[top-2]['addr'] = stack[top]['addr']
         stack[top-2]['type'] = stack[top]['type']
-        top -= 2
 
     #语句和块
     def statement(self, stack, top):
@@ -212,7 +234,6 @@ class Rules:
     # compound statements
     def compound_statement_1(self, stack, top):
         stack[top-2]['nextlist'] = stack[top-1]['nextlist']
-        top -= 2
 
     def block_item_listopt_1(self, stack, top):
         stack[top]['nextlist'] = stack[top]['nextlist']
@@ -226,7 +247,6 @@ class Rules:
     def block_item_list_2(self, stack, top):
         self.functions.backpatch(stack[top - 1]['nextlist'], self.functions.nextquad())
         stack[top - 1]['nextlist'] = stack[top]['nextlist']
-        top -= 1
 
     def block_item_1(self, stack, top):
         stack[top]['nextlist'] = []
@@ -243,7 +263,6 @@ class Rules:
     def selection_statement_rule_1(self, stack, top):
         stack[top - 6]['nextlist'] = self.functions.merge(stack[top - 3]['falselist'], stack[top]['nextlist'])
         self.functions.backpatch(stack[top - 3]['falselist'], stack[top - 1]['quad'])
-        top -= 6
 
     def goto_M(self, stack, top):
         stack.append({})
@@ -261,7 +280,6 @@ class Rules:
                                                                                stack[top-3]['nextlist']),stack[top]['nextlist'])
         self.functions.backpatch(stack[top - 7]['truelist'], stack[top - 5]['quad'])
         self.functions.backpatch(stack[top - 7]['falselist'], stack[top - 1]['quad'])
-        top -= 10
 
     def N_1(self, stack, top):
         stack.append({})
@@ -274,40 +292,33 @@ class Rules:
         self.functions.backpatch(stack[top]['nextlist'], stack[top-6]['quad'])
         self.functions.backpatch(stack[top-3]['nextlist'], stack[top - 1]['quad'])
         self.functions.gen('goto', result=stack[top-5]['quad'])
-        top -= 7
 
     # 声明
     def declaration_1(self, stack, top):
-        self.functions.enter(stack[top-1]['lexeme'],stack[top-1]['type'])
-        top -= 2
+        self.functions.enter(stack[top-1]['lexeme'],stack[top-2]['type'])
 
     def type_1(self, stack, top):
-        stack[top-1]['type'] = stack[top]['type']
-        top -= 1
+        stack[top-2]['type'] = stack[top]['type']
 
     def M_2(self, stack, top):
         stack.append({})
         self.t = stack[top]['type']
 
     def type_2(self, stack, top):
-        stack[top-1]['type'] = Pointer('pointer',stack[top]['type'])
-        top -= 2
+        stack[top-1]['type'] = Pointer('pointer',stack[top-1]['type'])
 
     def type_3(self, stack, top):
         stack[top-3]['type'] = Struct('struct', self.temp_field)
-        top -= 3
 
     def struct_declaration_list_1(self, stack, top):
         self.temp_field = [(stack[top]['id'],stack[top]['type'])]
 
     def struct_declaration_list_2(self, stack, top):
         self.temp_field.append((stack[top]['id'],stack[top]['type']))
-        top -= 1
 
     def struct_declaration_1(self, stack, top):
         stack[top-2]['id'] = stack[top - 1]['lexeme']
-        stack[top-2]['type'] = stack[top - 1]['type']
-        top -= 2
+        stack[top-2]['type'] = stack[top - 2]['type']
 
     def basic_1(self, stack, top):
         stack[top]['type'] = Type('int', 4)
@@ -329,14 +340,12 @@ class Rules:
         stack[top+1]['type'] = self.t
 
     def C_2(self, stack, top):
-        stack[top-3]['type'] = Array('array',stack[top-2]['addr'],stack[top]['type'])
-        top -= 3
+        stack[top-3]['type'] = Array('array',stack[top-2]['val'],stack[top]['type'])
 
     # 函数定义
     def function_definition(self, stack, top):
         stack[top-5]['type'] = Function('function',stack[top-4]['lexeme'],stack[top-5]['type'],self.args_list)
         self.functions.backpatch(stack[top]['nextlist'], self.functions.nextquad())
-        top -= 5
 
     def args_listopt(self, stack, top):
         self.args_list = []
