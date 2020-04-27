@@ -16,12 +16,12 @@ class Functions:
 
     @staticmethod
     def triple2addr(triple):
-        ops = ['+', '-', '*', '/']
+        ops = ['+', '-', '*', '/','GT']
 
         # x = y op z
 
         if triple[0]  in ops and (triple[1], triple[2]) != ('_', '_'):
-            return "%s = %s %s %s" % (triple[3], triple[1], triple[2], triple[0])
+            return "%s = %s %s %s" % (triple[3], triple[1], triple[0], triple[2])
         # x = op y
         elif triple[0] in ['+', '-'] :
             return "%s = %s %s" % (triple[3], triple[0], triple[1])
@@ -32,15 +32,15 @@ class Functions:
 
         # goto L
         elif triple[0] == 'goto':
-            return "goto %s" % (triple[1])
+            return "goto %s" % (triple[3])
 
         # if x goto L
         elif triple[0] == 'jne':
             return "if %s != 0 goto %s" % (triple[1], triple[3])
 
         # params x
-        elif triple[0] == 'params':
-            return 'params %s' % (triple[1])
+        elif triple[0] == 'param':
+            return 'param %s' % (triple[1])
 
         # call p, n
         elif triple[0] == 'call':

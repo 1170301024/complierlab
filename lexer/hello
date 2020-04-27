@@ -5,6 +5,7 @@ struct {
 
 int getSum(int x,int y){
     int w;
+    w = 12;
 }
 
 int main(){

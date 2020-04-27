@@ -76,7 +76,7 @@ class Struct(Type):
         self.fields = {}
         width = 0
         for field in field_list:
-            self.fields[field[0]] = field[1]
+            self.fields[field[0]] = field
             width += field[1].width
         super().__init__(type_str, width)
     def get_field(self, field_name):
@@ -91,8 +91,8 @@ class Struct(Type):
         str_list = []
         for key in self.fields.keys():
             field = self.fields[key]
-            str_list.append('(%sx%s)' %(field[0],field[1]))
-        str = 'x'.join(str_list)
+            str_list.append('(%s * %s)' %(field[0],field[1]))
+        str = ' * '.join(str_list)
         return 'struct('+str+')'
 
 
@@ -131,4 +131,7 @@ class Pointer(Type):
         super().__init__(type_str, width=8)
         self.type_str = type_str
         self.stype = stype
+
+    def __str__(self):
+        return 'pointer(%s)' %str(self.stype)
 

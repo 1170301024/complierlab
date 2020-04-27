@@ -5,6 +5,7 @@ from tkinter import filedialog, ttk ,messagebox
 from lexer.Tag import Tag
 from lexer.lexer import Lexer
 from myparser.cfg import Terminal
+from myparser.functions import Functions
 from myparser.parser import Parser
 
 root = Tk()
@@ -563,19 +564,40 @@ class UI:
             scY.pack(side=RIGHT, fill=Y)
             scX.pack(side=BOTTOM, fill=X)
 
-            # 三地址码
-            three_addr_code = Text(frame, width=40, yscrollcommand=scY.set, xscrollcommand=scX.set)
-            three_addr_code.pack(side=LEFT, expand=True, fill=BOTH)
+            # 四元式
+            text = Text(frame, width=40, yscrollcommand=scY.set, xscrollcommand=scX.set)
+            text.pack(side=LEFT, expand=True, fill=BOTH)
 
             codes = self.parser.cfg.rules.functions.instructions
-            tag = 0
-            for code in codes:
-                three_addr_code.insert(tkinter.END,
-                                       '\n' + str(tag) + ' : (' + str(code[0]) + ' ,' + str(code[1]) + ' ,' + str(code[2]) + ' ,' +
+            labels = self.parser.cfg.rules.functions.label_dict
+            text.insert(tkinter.END,'四元式：')
+            for quad in range(len(codes)):
+                for label in labels.keys():
+                    if quad == labels[label]:
+                        text.insert(tkinter.END,'\n'+label+' : ')
+                        continue
+                code = codes[quad]
+                text.insert(tkinter.END,
+                                       '\n' + str(quad) + ' : (' + str(code[0]) + ' ,' + str(code[1]) + ' ,' + str(code[2]) + ' ,' +
                                        str(code[3]) + ')')
-                tag += 1
-            three_addr_code.insert(tkinter.END,
-                                   '\n' + str(tag) + ' : ')
+            text.insert(tkinter.END,
+                                   '\n' + str(len(codes)) + ' : ')
+
+            # 三地址码
+
+            tag = 0
+            text.insert(tkinter.END, '\n\n\n\n三地址码：')
+            for quad in range(len(codes)):
+                for label in labels.keys():
+                    if quad == labels[label]:
+                        text.insert(tkinter.END,'\n'+label+' : ')
+                        continue
+                code = codes[quad]
+                three_addr_code = Functions.triple2addr(code)
+                text.insert(tkinter.END,'\n' + str(quad) + ' :' + three_addr_code)
+            text.insert(tkinter.END,
+                        '\n' + str(len(codes)) + ' : ')
+
 
             # 符号表
             frame1 = Frame(window)
@@ -604,7 +626,7 @@ class UI:
             for symbol in symbol_table.keys():
                 entry = symbol_table[symbol]
                 name = entry.name
-                type = entry.type.type_str
+                type = str(entry.type)
                 width = str(entry.type.width)
                 treeview.insert('','end',text=name+type+width,values=(name,type,width))
 
