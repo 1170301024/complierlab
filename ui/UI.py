@@ -612,7 +612,7 @@ class UI:
             treeview = ttk.Treeview(frame1, height=19, columns=column, show='headings')
             treeview.pack(anchor=W, ipadx=100, side=LEFT, expand=True, fill=BOTH)
             for head in column:
-                treeview.column(head, width=200, anchor='center')
+                treeview.column(head, width=300, anchor='center')
                 treeview.heading(head, text=head)
             # ----vertical scrollbar------------
             vbar = ttk.Scrollbar(treeview, orient=VERTICAL, command=treeview.yview)
