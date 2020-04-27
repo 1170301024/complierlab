@@ -14,6 +14,41 @@ class Functions:
         self.label_dict = {}
         self.label_name_index = 0
 
+    @staticmethod
+    def triple2addr(triple):
+        ops = ['+', '-', '*', '/']
+
+        # x = y op z
+
+        if triple[0]  in ops and (triple[1], triple[2]) != ('_', '_'):
+            return "%s = %s %s %s" % (triple[3], triple[1], triple[2], triple[0])
+        # x = op y
+        elif triple[0] in ['+', '-'] :
+            return "%s = %s %s" % (triple[3], triple[0], triple[1])
+
+        # x = y
+        elif triple[0] in ['=']:
+            return "%s = %s" % (triple[3], triple[1])
+
+        # goto L
+        elif triple[0] == 'goto':
+            return "goto %s" % (triple[1])
+
+        # if x goto L
+        elif triple[0] == 'jne':
+            return "if %s != 0 goto %s" % (triple[1], triple[3])
+
+        # params x
+        elif triple[0] == 'params':
+            return 'params %s' % (triple[1])
+
+        # call p, n
+        elif triple[0] == 'call':
+            return 'call %s, %s' % (triple[1], triple[2])
+        else:
+            return str(triple) + '没有对应的三地址码'
+
+
     # 回填相关
     def makelist(self, i):
         '''
