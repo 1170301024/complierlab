@@ -53,12 +53,16 @@ class Rules:
         stack[top-3]['addr'] = self.functions.newtemp()
         for r_args, f_args in zip(self.temp_argument, stack[top-3]['type'].get_params()):
             if self.functions.type_conversion(r_args,f_args): # 可以类型转化
-                self.functions.gen('param',r_args)
+                self.functions.gen('param',r_args[0])
             else:
                 raise None # 参数类型不匹配
         self.functions.gen('call', temp_addr, len(self.temp_argument), stack[top-3]['addr'])
         stack[top-3]['type'] = stack[top-3]['type'].get_result_type()
         top -= 3
+
+    def argument_expression_listopt(self, stack, top):
+        stack.append({})
+
 
     def argument_expression_list_1(self, stack, top):
         self.temp_argument = [(stack[top]['addr'], stack[top]['type']),]
@@ -164,31 +168,10 @@ class Rules:
         stack[top]['addr'] = stack[top]['addr']
         stack[top]['type'] = stack[top]['type']
 
-    def relational_expression_2(self, stack, top):
+    def relational_expression(self, stack, top):
         temp_addr = stack[top-2]['addr']
         stack[top-2]['addr'] = self.functions.newtemp()
-        self.functions.gen('<',temp_addr,stack[top]['addr'],stack[top-2]['addr'])
-        stack[top-2]['type'] = Type('int', 4)
-        top -= 2
-
-    def relational_expression_3(self, stack, top):
-        temp_addr = stack[top-2]['addr']
-        stack[top-2]['addr'] = self.functions.newtemp()
-        self.functions.gen('>',temp_addr,stack[top]['addr'],stack[top-2]['addr'])
-        stack[top-2]['type'] = Type('int', 4)
-        top -= 2
-
-    def relational_expression_4(self, stack, top):
-        temp_addr = stack[top-2]['addr']
-        stack[top-2]['addr'] = self.functions.newtemp()
-        self.functions.gen('<=',temp_addr,stack[top]['addr'],stack[top-2]['addr'])
-        stack[top-2]['type'] = Type('int', 4)
-        top -= 2
-
-    def relational_expression_5(self, stack, top):
-        temp_addr = stack[top-2]['addr']
-        stack[top-2]['addr'] = self.functions.newtemp()
-        self.functions.gen('>=',temp_addr,stack[top]['addr'],stack[top-2]['addr'])
+        self.functions.gen(stack[top-1]['lexeme'],temp_addr,stack[top]['addr'],stack[top-2]['addr'])
         stack[top-2]['type'] = Type('int', 4)
         top -= 2
 
@@ -346,8 +329,10 @@ class Rules:
     def function_definition(self, stack, top):
         stack[top-5]['type'] = Function('function',stack[top-4]['lexeme'],stack[top-5]['type'],self.args_list)
         self.functions.backpatch(stack[top]['nextlist'], self.functions.nextquad())
+        self.functions.enter(stack[top-4]['lexeme'],stack[top-5]['type'])
 
     def args_listopt(self, stack, top):
+        stack.append({})
         self.args_list = []
 
     def args_list_1(self, stack, top):

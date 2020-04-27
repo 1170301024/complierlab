@@ -83,6 +83,8 @@ class Functions:
     def widen(self, addr, type1, type2):
         if not isinstance(type1, Type) or not isinstance(type2, Type):
             raise TypeError
+        if type1 == type2:
+            return addr
         priority_list = [Type('double',8),Type('float',4),Type('int',4),Type('char',1)]
         if type1 == priority_list[2] or type1 == priority_list[3]:
             pass
@@ -95,4 +97,4 @@ class Functions:
 
     # 类型转换
     def type_conversion(self, type1, type2):
-        pass
+        return True

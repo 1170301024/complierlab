@@ -540,7 +540,7 @@ class UI:
             # 初始化窗口
             window = Tk()
             window.title('语义分析')
-            window.geometry('600x600')
+            window.geometry('1200x600')
             window.resizable(0, 0)
 
             if self.lexer.program == None:
@@ -564,18 +564,52 @@ class UI:
             scX.pack(side=BOTTOM, fill=X)
 
             # 三地址码
-            three_addr_code = Text(frame, width=80, yscrollcommand=scY.set, xscrollcommand=scX.set)
+            three_addr_code = Text(frame, width=40, yscrollcommand=scY.set, xscrollcommand=scX.set)
             three_addr_code.pack(side=LEFT, expand=True, fill=BOTH)
 
             codes = self.parser.cfg.rules.functions.instructions
-            tag = 100
+            tag = 0
             for code in codes:
                 three_addr_code.insert(tkinter.END,
-                                       '\n' + str(tag) + ' : (' + code[0] + ' ,' + code[1] + ' ,' + code[2] + ' ,' +
-                                       code[3] + ')')
+                                       '\n' + str(tag) + ' : (' + str(code[0]) + ' ,' + str(code[1]) + ' ,' + str(code[2]) + ' ,' +
+                                       str(code[3]) + ')')
                 tag += 1
             three_addr_code.insert(tkinter.END,
                                    '\n' + str(tag) + ' : ')
+
+            # 符号表
+            frame1 = Frame(window)
+            frame1.pack(side=LEFT, anchor=N, expand=True, fill=BOTH)
+            symbol_table = self.parser.cfg.rules.functions.symbol_table.table # {}
+
+            content1 = Text(frame1, width=0, height=30)
+            content1.pack(anchor=E, side=LEFT, expand=False)
+            content1.configure(background=window.cget('background'), highlightbackground=window.cget('background'))
+
+            column = ['name', 'type', 'width']
+            treeview = ttk.Treeview(frame1, height=19, columns=column, show='headings')
+            treeview.pack(anchor=W, ipadx=100, side=LEFT, expand=True, fill=BOTH)
+            for head in column:
+                treeview.column(head, width=200, anchor='center')
+                treeview.heading(head, text=head)
+            # ----vertical scrollbar------------
+            vbar = ttk.Scrollbar(treeview, orient=VERTICAL, command=treeview.yview)
+            treeview.configure(yscrollcommand=vbar.set)
+            vbar.pack(side=RIGHT, fill=Y)
+            # ----horizontal scrollbar----------
+            hbar = ttk.Scrollbar(treeview, orient=HORIZONTAL, command=treeview.xview)
+            treeview.configure(xscrollcommand=hbar.set)
+            hbar.pack(side=BOTTOM, fill=X)
+
+            for symbol in symbol_table.keys():
+                entry = symbol_table[symbol]
+                name = entry.name
+                type = entry.type.type_str
+                width = str(entry.type.width)
+                treeview.insert('','end',text=name+type+width,values=(name,type,width))
+
+            window.mainloop()
+
 
         def projectDir():
             '''
@@ -647,10 +681,10 @@ class UI:
             scX.pack(side=BOTTOM, fill=X)
 
             # 行数和代码显示
-            self.line = Text(lineframe, width=3, yscrollcommand=scY.set)
+            self.line = Text(lineframe, width=3, yscrollcommand=scY.set,font=('微软雅黑', 10))
             self.line.pack(side=LEFT, fill=Y, expand=True)
             self.line.configure(background='Gray')
-            self.content = Text(test, width=80, yscrollcommand=scY.set, xscrollcommand=scX.set)
+            self.content = Text(test, width=80, yscrollcommand=scY.set, xscrollcommand=scX.set,font=('微软雅黑', 10))
             self.content.pack(side=LEFT, expand=True, fill=BOTH)
             scY.config(command=multiple_yview)
 
