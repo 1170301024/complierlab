@@ -1,8 +1,9 @@
+
+
 class Symbols_Table:
     def __init__(self):
-
         # table是一个字典，键是标识符的名称，值是对应的Symbol_Table_Entry
-        self.table = {}
+        self.table = dict()
 
     def add_symbol_entry(self, entry):
         '''
@@ -13,9 +14,11 @@ class Symbols_Table:
         if entry.name in self.table.keys():
             raise TypeError
         else:
-            self.table[entry.get_name()] = entry
+            self.table[entry.name] = entry
 
     def lookup(self, name):
+        if name not in self.table.keys():
+            raise TypeError
         return self.table[name]
 
 
@@ -35,11 +38,30 @@ class Symbol_Table_Entry:
     def get_addr(self):
         return self.addr
 
+    def __eq__(self, other):
+        if not isinstance(Symbol_Table_Entry, other):
+            return False
+        if (self.name, self.type, self.addr) == (other.name, other.type, other.addr):
+            return True
+        return False
+
+    def __str__(self):
+        return '(%s, %s, %s)' % (self.name , self.type, self.addr)
+
 
 class Type:
     def __init__(self, type_str, width):
         self.type_str = type_str
         self.width = width
+
+    def __eq__(self, other):
+        if not isinstance(Type, other):
+            return False
+        if other.type_str == self.type_str :
+            return True
+        return False
+    def __str__(self):
+        return self.type_str + str(self.width)
 
 class Array(Type):
     def __init__(self, type_str, num, stype):

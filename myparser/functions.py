@@ -9,6 +9,7 @@ class Functions:
         self.temp_label = 1
         self.instructions = []
         self.symbol_table = Symbols_Table()
+        self.i = 0
 
     # 回填相关
     def makelist(self, i):
@@ -57,7 +58,7 @@ class Functions:
 
     # 符号表相关的
     def lookup(self, name):
-        return self.symbol_table.lookup(name)
+       return self.symbol_table.lookup(name)
 
     def newtemp(self, ):
         label = 't' + str(self.temp_label)
@@ -69,7 +70,8 @@ class Functions:
         pass
 
     def enter(self, name, type):
-        entry = Symbol_Table_Entry(name,type,0)
+        self.i += 1
+        entry = Symbol_Table_Entry(name, type, 0)
         self.symbol_table.add_symbol_entry(entry)
 
     # 类型转换
