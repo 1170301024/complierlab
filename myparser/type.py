@@ -33,7 +33,7 @@ class Symbol_Table_Entry:
         return self.type
 
     def get_addr(self):
-        return self.addr
+        return self.name
 
 
 class Type:
@@ -45,6 +45,9 @@ class Type:
         if not isinstance(other, Type):
             raise TypeError
         return self.type_str == other.type_str and self.width == self.width
+
+    def __str__(self):
+        return self.type_str
 
 
 class Array(Type):
@@ -59,6 +62,9 @@ class Array(Type):
         :return:
         '''
         return self.stype
+
+    def __str__(self):
+        return 'array('+ str(self.stype) + ',' + str(self.num) + ')'
 
 class Struct(Type):
     def __init__(self, type_str, field_list):
@@ -80,6 +86,14 @@ class Struct(Type):
         :return:
         '''
         return self.fields[field_name]
+
+    def __str__(self):
+        str_list = []
+        for key in self.fields.keys():
+            field = self.fields[key]
+            str_list.append('(%sx%s)' %(field[0],field[1]))
+        str = 'x'.join(str_list)
+        return 'struct('+str+')'
 
 
 class Function(Type):

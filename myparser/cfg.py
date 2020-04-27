@@ -68,7 +68,7 @@ class Cfg:
         reserve(Nonterminal('argument-expression-listopt'),
                 [Nonterminal('argument-expression-list')])
         reserve(Nonterminal('argument-expression-listopt'),
-                [Empty()])
+                [Empty()],self.rules.argument_expression_listopt)
         reserve(Nonterminal('argument-expression-list'),
                 [Nonterminal('assignment-expression')], self.rules.argument_expression_list_1)
         reserve(Nonterminal('argument-expression-list'),
@@ -147,7 +147,7 @@ class Cfg:
                 [Nonterminal('additive-expression')])
         reserve(Nonterminal('relational-expression'),
                 [Nonterminal('relational-expression'),Terminal(Tag.REL,'REL'),Nonterminal('additive-expression')],
-                self.rules.relational_expression_2)
+                self.rules.relational_expression)
 
         # 等价操作符
         # equality-expression -> relational-expression

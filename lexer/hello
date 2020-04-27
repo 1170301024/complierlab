@@ -2,6 +2,11 @@ struct {
     int *p;
     double f;
 }item;
+
+int getSum(int x,int y){
+    int w;
+}
+
 int main(){
     int x;
     int y;  /* error */
@@ -12,6 +17,7 @@ int main(){
             x = x + 1;
         int z;
     }
+    getSum(1,2);
 
 }
 
