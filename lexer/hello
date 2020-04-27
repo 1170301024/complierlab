@@ -12,9 +12,8 @@ int main(){
             x = x + 1;
         int z;
     }
-    getSum(1,2);    /*error*/
+
 }
-int x;
 
 
 

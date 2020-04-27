@@ -262,7 +262,7 @@ class Rules:
     # selection statements
     def selection_statement_rule_1(self, stack, top):
         stack[top - 6]['nextlist'] = self.functions.merge(stack[top - 3]['falselist'], stack[top]['nextlist'])
-        self.functions.backpatch(stack[top - 3]['falselist'], stack[top - 1]['quad'])
+        self.functions.backpatch(stack[top - 3]['truelist'], stack[top - 1]['quad'])
 
     def goto_M(self, stack, top):
         stack.append({})
@@ -290,8 +290,8 @@ class Rules:
     def iteration_statement_rule_1(self, stack, top):
         stack[top - 7]['nextlist'] = stack[top-3]['falselist']
         self.functions.backpatch(stack[top]['nextlist'], stack[top-6]['quad'])
-        self.functions.backpatch(stack[top-3]['nextlist'], stack[top - 1]['quad'])
-        self.functions.gen('goto', result=stack[top-5]['quad'])
+        self.functions.backpatch(stack[top-3]['truelist'], stack[top - 1]['quad'])
+        self.functions.gen('goto', result=stack[top-6]['quad'])
 
     # 声明
     def declaration_1(self, stack, top):

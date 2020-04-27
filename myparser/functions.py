@@ -27,7 +27,10 @@ class Functions:
         :param list2:
         :return:
         '''
-        return list1.extend(list2)
+        list = []
+        list.extend(list1)
+        list.extend(list2)
+        return list
 
     def backpatch(self, list, quad):
         '''
@@ -39,10 +42,13 @@ class Functions:
 
         for i in list:
             inst = self.instructions[i]
-            if inst[i][0] != 'goto_':
+            print(inst)
+            if inst[0] == 'goto_':
+                self.instructions[i] = ('goto', '_', '_', quad)
+            elif inst[3] == 'goto_':
+                self.instructions[i] = (inst[0], inst[1], inst[2], quad)
+            else:
                 raise TypeError
-            self.instructions[i] = ('goto', '_', '_', quad)
-
 
     def nextquad(self, ):
         '''
@@ -55,6 +61,7 @@ class Functions:
     def gen(self, op, arg1='_', arg2='_', result='_'):
         inst = (op, arg1, arg2, result)
         self.instructions.append(inst)
+        self.quad += 1
 
     # 符号表相关的
     def lookup(self, name):
