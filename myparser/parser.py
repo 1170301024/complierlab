@@ -310,9 +310,9 @@ class Parser:
         look = None
         move()
         while True:
-            print(attr_stack)
+            # print(attr_stack)
             # print(self.cfg.rules.functions.i)
-            print(look)
+            # print(look)
             # print(state_stack)
             state_actions =  self.actions[state_stack[-1]]
             error_flag1 = True
