@@ -602,7 +602,7 @@ class UI:
             # 符号表
             frame1 = Frame(window)
             frame1.pack(side=LEFT, anchor=N, expand=True, fill=BOTH)
-            symbol_table = self.parser.cfg.rules.functions.symbol_table.table # {}
+            symbol_table = self.parser.cfg.rules.functions.symbol_tables[0].table # {}
 
             content1 = Text(frame1, width=0, height=30)
             content1.pack(anchor=E, side=LEFT, expand=False)
@@ -629,6 +629,9 @@ class UI:
                 type = str(entry.type)
                 width = str(entry.type.width)
                 treeview.insert('','end',text=name+type+width,values=(name,type,width))
+            # 错误处理
+            for error in Functions.error_messages:
+                errorHandler(error[0], error[1])
 
             window.mainloop()
 

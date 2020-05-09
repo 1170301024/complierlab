@@ -3,16 +3,22 @@ from myparser.type import Symbols_Table, Symbol_Table_Entry, Type
 
 class Functions:
 
+    error_messages = []
     def __init__(self):
         # 初始化指令为0
         self.quad = 0
         self.temp_label = 1
         self.instructions = []
-        self.symbol_table = Symbols_Table()
-
+        self.symbol_tables = [Symbols_Table(),]
         # label和label所在的指令索引
         self.label_dict = {}
         self.label_name_index = 0
+        self.line = 0
+        self.cur_symbol_table = self.symbol_tables[-1]
+
+    @staticmethod
+    def add_error(line, message):
+        Functions.error_messages.append((line, message))
 
     @staticmethod
     def triple2addr(triple):
@@ -51,7 +57,14 @@ class Functions:
         else:
             return str(triple) + '没有对应的三地址码'
 
+    # 符号表相关
+    def create_symbol_table(self):
+        self.symbol_tables.append(Symbols_Table())
+        self.cur_symbol_table = self.symbol_tables[-1]
 
+    def delete_symbol_table(self):
+        self.symbol_tables.pop()
+        self.cur_symbol_table = self.symbol_tables[-1]
     # 回填相关
     def makelist(self, i):
         '''
@@ -113,7 +126,13 @@ class Functions:
 
     # 符号表相关的
     def lookup(self, name):
-       return self.symbol_table.lookup(name)
+       for s in reversed(self.symbol_tables):
+           entry = s.lookup(name)
+           if entry is not None:
+               return entry
+       Functions.add_error(self.line, '变量未声明')
+
+
 
     def newtemp(self, ):
         label = 't' + str(self.temp_label)
@@ -130,7 +149,7 @@ class Functions:
 
     def widen(self, addr, type1, type2):
         if not isinstance(type1, Type) or not isinstance(type2, Type):
-            raise TypeError
+            Functions.add_error(self.line, '类型不匹配')
         if type1 == type2:
             return addr
         priority_list = [Type('double',8),Type('float',4),Type('int',4),Type('char',1)]
@@ -140,8 +159,8 @@ class Functions:
 
     def enter(self, name, type):
         entry = Symbol_Table_Entry(name, type, 0)
-        self.symbol_table.add_symbol_entry(entry)
+        self.cur_symbol_table.add_symbol_entry(entry, self.line)
 
     # 类型转换
     def type_conversion(self, type1, type2):
-        return True
+        return type1 == type2

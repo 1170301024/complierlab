@@ -556,8 +556,10 @@ class Cfg:
         # block-item -> declaration
         # block-item -> statement
         reserve(Nonterminal('compound-statement'),
-                [Terminal(Tag.LP,'{'),Nonterminal('block-item-listopt'),Terminal(Tag.RP,'}')],
+                [Terminal(Tag.LP,'{'), Nonterminal('pound_M'), Nonterminal('block-item-listopt'),Terminal(Tag.RP,'}')],
                 self.rules.compound_statement_1)
+
+        reserve(Nonterminal('pound_M'), [Empty()], self.rules.pound_M)
         reserve(Nonterminal('block-item-listopt'),
                 [Nonterminal('block-item-list')],
                 self.rules.block_item_listopt_1)

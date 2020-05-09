@@ -1,22 +1,29 @@
+
+
+
 class Symbols_Table:
     def __init__(self):
 
         # table是一个字典，键是标识符的名称，值是对应的Symbol_Table_Entry
         self.table = {}
 
-    def add_symbol_entry(self, entry):
+
+    def add_symbol_entry(self, entry, line):
         '''
         将一个符号表条目加入到符号表中
         :param entry:
         :return:
         '''
         if entry.name in self.table.keys():
-            raise TypeError
+            from myparser.functions import Functions
+            Functions.add_error(line, '变量重复声明')
         else:
             self.table[entry.get_name()] = entry
 
     def lookup(self, name):
-        return self.table[name]
+        if name in self.table.keys():
+            return self.table[name]
+        return None
 
 
 

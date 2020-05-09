@@ -241,6 +241,7 @@ class Parser:
             nonlocal look
             token = self.lexer.getnexttoken()
             look = Terminal.init_token(token[1])
+            self.cfg.rules.functions.line = self.lexer.row
 
         # 2 -> A ->3 -> action token
         def error_handler():
@@ -311,7 +312,6 @@ class Parser:
         move()
         while True:
             # print(attr_stack)
-            # print(self.cfg.rules.functions.i)
             # print(look)
             # print(state_stack)
             state_actions =  self.actions[state_stack[-1]]

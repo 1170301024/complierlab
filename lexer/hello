@@ -3,16 +3,21 @@ struct {
     double f;
 }item;
 
+int a;
+
 int getSum(int x,int y){
+    z = 12; /* error*/
+    x = y;
     int w;
-    w = 12;
+    w =3;
     if(w>12){
         w = w + 1;
     }
     else {
         w = w - 1;
     }
-    return w;
+    int w;
+    return y;
 }
 
 int main(){
@@ -25,10 +30,11 @@ int main(){
             x = x + 1;
         int z;
     }
-    z = x;
-    getSum(1,2);
+    y = x;
+    getSum(1,2.2);
     return x;
 }
+
 
 
 

@@ -20,8 +20,13 @@ class Rules:
 
     # 基本表达式
     def primary_expression_rule_1(self, stack, top):
-        stack[top]['addr'] = self.functions.lookup(stack[top]['lexeme']).get_addr()
-        stack[top]['type'] = self.functions.lookup(stack[top]['lexeme']).get_type()
+        entry = self.functions.lookup(stack[top]['lexeme'])
+        if entry is None:
+            stack[top]['addr'] = None
+            stack[top]['type'] = None
+            return
+        stack[top]['addr'] = entry.get_addr()
+        stack[top]['type'] = entry.get_type()
 
     def primary_expression_rule_2(self, stack, top):
 
@@ -52,10 +57,10 @@ class Rules:
         temp_addr = stack[top-3]['addr']
         stack[top-3]['addr'] = self.functions.newtemp()
         for r_args, f_args in zip(self.temp_argument, stack[top-3]['type'].get_params()):
-            if self.functions.type_conversion(r_args,f_args): # 可以类型转化
+            if self.functions.type_conversion(r_args[1],f_args[0]): # 可以类型转化
                 self.functions.gen('param',r_args[0])
             else:
-                raise None # 参数类型不匹配
+                Functions.add_error(self.functions.line, "实参与形参类型不匹配") # 参数类型不匹配
         self.functions.gen('call', temp_addr, len(self.temp_argument))
         stack[top-3]['type'] = stack[top-3]['type'].get_result_type()
         top -= 3
@@ -79,7 +84,6 @@ class Rules:
     def unary_expression_2(self, stack, top):
         stack[top-1]['addr'] = self.functions.newtemp()
         self.functions.gen(stack[top-1]['op'], stack[top], result=stack[top-1]['addr'])
-        top -= 1
 
 
     # 一元操作符
@@ -115,9 +119,7 @@ class Rules:
         a = self.functions.widen(temp_addr, temp_type, stack[top-2]['type'])
         b = self.functions.widen(stack[top]['addr'], stack[top]['type'], stack[top-2]['type'])
         stack[top-2]['addr'] = self.functions.newtemp()
-        '''改了'''
         self.functions.gen('*', a, b, stack[top-2]['addr'])
-        top -= 2
 
     def multiplicative_expression_3(self, stack, top):
         temp_addr = stack[top - 2]['addr']
@@ -127,7 +129,6 @@ class Rules:
         b = self.functions.widen(stack[top]['addr'], stack[top]['type'], stack[top - 2]['type'])
         stack[top - 2]['addr'] = self.functions.newtemp()
         self.functions.gen('/', a, b, stack[top - 2]['addr'])
-        top -= 2
 
     def multiplicative_expression_4(self, stack, top):
         temp_addr = stack[top - 2]['addr']
@@ -151,7 +152,6 @@ class Rules:
         b = self.functions.widen(stack[top]['addr'], stack[top]['type'], stack[top - 2]['type'])
         stack[top - 2]['addr'] = self.functions.newtemp()
         self.functions.gen('+', a, b, stack[top - 2]['addr'])
-        top -= 2
 
     def additive_expression_3(self, stack, top):
         temp_addr = stack[top - 2]['addr']
@@ -161,7 +161,6 @@ class Rules:
         b = self.functions.widen(stack[top]['addr'], stack[top]['type'], stack[top - 2]['type'])
         stack[top - 2]['addr'] = self.functions.newtemp()
         self.functions.gen('-', a, b, stack[top - 2]['addr'])
-        top -= 2
 
     # 关系操作符
     def relational_expression_1(self, stack, top):
@@ -173,7 +172,6 @@ class Rules:
         stack[top-2]['addr'] = self.functions.newtemp()
         self.functions.gen(stack[top-1]['lexeme'],temp_addr,stack[top]['addr'],stack[top-2]['addr'])
         stack[top-2]['type'] = Type('int', 4)
-        top -= 2
 
     # 等价操作符文法没实现，逻辑与、或没写完
     def logical_AND_expression_1(self, stack, top):
@@ -182,7 +180,6 @@ class Rules:
 
     def logical_AND_expression_2(self, stack, top):
         stack[top-2]['addr'] = self.functions.newtemp()
-        '''需改正'''
 
 
     # 条件操作符
@@ -224,7 +221,16 @@ class Rules:
 
     # compound statements
     def compound_statement_1(self, stack, top):
-        stack[top-2]['nextlist'] = stack[top-1]['nextlist']
+        stack[top-3]['nextlist'] = stack[top-1]['nextlist']
+        self.functions.delete_symbol_table()
+
+    def pound_M(self, stack, top):
+        stack.append({})
+        self.functions.create_symbol_table()
+        if 'fun_def' in stack[top-1].keys():
+            for args in self.args_list:
+                self.functions.enter(args[1], args[0])
+
 
     def block_item_listopt_1(self, stack, top):
         stack[top]['nextlist'] = stack[top]['nextlist']
@@ -356,6 +362,7 @@ class Rules:
 
     def label_M(self, stack, top):
         stack.append({})
+        stack[top+1]['fun_def'] = None
         self.functions.newlabel(stack[top-3]['lexeme'])
 
     def jump_statement(self, stack, top):
