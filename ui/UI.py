@@ -538,12 +538,6 @@ class UI:
             pass
 
         def semanticsAnalysis():
-            # 初始化窗口
-            window = Tk()
-            window.title('语义分析')
-            window.geometry('1200x600')
-            window.resizable(0, 0)
-
             if self.lexer.program == None:
                 tkinter.messagebox.showinfo('提示', '未读取分析文件')
                 return
@@ -555,6 +549,18 @@ class UI:
             self.lexer.program = self.content.get('0.0', 'end')
             self.contentList = self.content.get("0.0", "end").split("\n")
             self.contentList.pop()  # 列表最后一个元素是空删除它
+
+            # 错误处理
+            if len(Functions.error_messages) != 0:
+                for error in Functions.error_messages:
+                    errorHandler(error[0], error[1])
+                return
+
+            # 初始化窗口
+            window = Tk()
+            window.title('语义分析')
+            window.geometry('1200x600')
+            window.resizable(0, 0)
 
             frame = Frame(window)
             frame.pack(side=LEFT, anchor=N, expand=True, fill=BOTH)
@@ -629,9 +635,6 @@ class UI:
                 type = str(entry.type)
                 width = str(entry.type.width)
                 treeview.insert('','end',text=name+type+width,values=(name,type,width))
-            # 错误处理
-            for error in Functions.error_messages:
-                errorHandler(error[0], error[1])
 
             window.mainloop()
 
