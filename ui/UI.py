@@ -284,16 +284,18 @@ class UI:
             clear(self.errorTreeview)
             while True:
                 recieve = self.lexer.getnexttoken()
-                input = recieve[0]
-                token = recieve[1]
+                input = recieve[0] # input
+                token = recieve[1] # token{code,attr}
+                print(input)
                 if (token.code == 'error'):
                     print(token.attr)
                     errorHandler(input, token)
                     continue
+                if (token.code == Tag.END):
+                    print("zhixing ")
+                    break
                 while input not in self.contentList[currentLine]: #行号记录
                     currentLine += 1
-                if (token.code == "end"):
-                    break
                 record = recieve[2]
                 # print(input, ' ', token, ' ', currentLine, '\n')
                 treeview.insert('', 'end', value=(input, token, currentLine + 1))
